@@ -47,7 +47,15 @@
         #svg-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
         #svg-container svg { width: 100%; max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 1); border: 1px solid var(--border-color); background: #fff; }
 
-        .header-left, .header-right { display: flex; align-items: center; gap: 12px; }
+        .header-left, .header-right { display: flex; align-items: center; gap: 12px; flex: 1; }
+        .header-right { justify-content: flex-end; }
+        
+        /* ADOBE STOCK WARNING BOX */
+        .header-warning { flex: 1; display: flex; justify-content: center; }
+        .warning-box { border: 1px solid var(--accent-main); padding: 6px 15px; border-radius: 4px; text-align: center; background: rgba(255, 51, 102, 0.05); }
+        .warning-box .en { color: var(--accent-main); font-size: 11px; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; }
+        .warning-box .bn { color: #f8fafc; font-size: 10px; font-weight: 600; margin-top: 3px; }
+
         .logo { font-weight: 900; font-size: 16px; color: #fff; display: flex; align-items: center; gap: 10px; letter-spacing: 0.5px;}
         .logo-icon { width: 28px; height: 28px; background: repeating-linear-gradient(45deg, var(--accent-main), var(--accent-main) 3px, transparent 3px, transparent 6px); border-radius: 4px; display: grid; place-items: center; border: 1px solid var(--accent-main);} 
         
@@ -180,6 +188,15 @@
             </div>
             <div style="color: #a1a1aa; font-size: 11px; margin-left: 10px; border-left: 1px solid #333; padding-left: 10px;">Master Poster Generator</div>
         </div>
+        
+        <!-- NEW RED BOX WARNING FOR ADOBE STOCK -->
+        <div class="header-warning">
+            <div class="warning-box">
+                <div class="en">⚠️ Adobe Stock / Microstock Alert</div>
+                <div class="bn">To avoid 'Similar Issue', customize the designs before uploading! / 'Similar Issue' এড়াতে প্যানেল থেকে ডিজাইন কাস্টমাইজ করে নিন!</div>
+            </div>
+        </div>
+
         <div class="header-right">
             <div class="user-profile" id="user-profile" style="display: none;">
                 <img id="user-avatar" src="" alt="User">
@@ -319,7 +336,6 @@
         let currentUser = null;
         let isUserPro = false;
 
-        // FIXED AUTH LOGIC: No more infinite loops!
         auth.onAuthStateChanged((user) => {
             if (user) {
                 currentUser = user;
@@ -330,7 +346,6 @@
 
                 const userRef = db.collection("users").doc(user.uid);
                 
-                // শুধুমাত্র প্রথমবার অ্যাকাউন্টের ডাটা সেভ করবে
                 userRef.get().then((doc) => {
                     if (!doc.exists) {
                         userRef.set({
@@ -348,7 +363,6 @@
                     }
                 });
 
-                // ফায়ারবেস থেকে শুধু চেঞ্জগুলো রিড করবে (আপডেট করবে না)
                 userRef.onSnapshot((doc) => {
                     if (doc.exists) {
                         let userData = doc.data();
@@ -452,7 +466,7 @@
         }
 
         // ==========================================
-        // ENGINE & GENERATOR LOGIC
+        // ENGINE & GENERATOR LOGIC (GENERIC TEXT UPDATE)
         // ==========================================
         const svgContainer = document.getElementById('svg-container');
         const consoleMsg = document.getElementById('console-msg');
@@ -484,7 +498,9 @@
             { bg: '#BFFF00', line: '#1C212E', typo: '#BFFF00', text: '#1C212E' },
             { bg: '#F0E6D2', line: '#1A2436', typo: '#F0E6D2', text: '#8CB83C' }
         ];
-        const titles = ['DESIGN', 'DYNAMIC', 'LAB', 'POSTER', 'BENGALI', 'ENGLISH', 'STUDIO', 'HALFTONE', 'VORTEX', 'VECTOR'];
+        
+        // Updated to generic text for Adobe Stock
+        const titles = ['LOREM', 'IPSUM', 'DOLOR', 'POSTER', 'VECTOR', 'MODERN', 'STUDIO', 'ABSTRACT', 'VORTEX', 'MINIMAL'];
 
         let activePanels = [];
 
@@ -635,12 +651,13 @@
             let typo = `<rect x="0" y="0" width="${sideW}" height="${h}" fill="${p.typo}" />`;
             typo += `<line x1="${sideW}" y1="0" x2="${sideW}" y2="${h}" stroke="${p.line}" stroke-width="4" />`;
             
-            let txt = "Design Dynamic Lab - Premium Poster Studio.";
+            // Updated Generic Text for Adobe Stock
+            let txt = "Lorem ipsum dolor sit amet - Premium Vector Studio.";
             typo += `<text x="${-h + pad}" y="${pad * 1.5}" transform="rotate(-90)" font-weight="600" font-size="${sideW * 0.08}" fill="${p.line}" opacity="0.6">${txt}</text>`;
             typo += `<text x="${-h + pad}" y="${pad * 2.2}" transform="rotate(-90)" font-weight="600" font-size="${sideW * 0.08}" fill="${p.line}" opacity="0.6">${txt}</text>`;
             
             let boxY = h - (w * 0.45);
-            typo += `<text x="${pad}" y="${boxY}" font-weight="900" font-size="${sideW * 0.15}" fill="${p.line}">DDL</text>`;
+            typo += `<text x="${pad}" y="${boxY}" font-weight="900" font-size="${sideW * 0.15}" fill="${p.line}">VOL</text>`;
             typo += `<text x="${pad}" y="${boxY + sideW*0.12}" font-weight="700" font-size="${sideW * 0.12}" fill="${p.line}">#0${panel.id}</text>`;
             let boxCol = (p.bg === '#1C212E' || p.bg === '#09090b') ? '#00E5FF' : '#FF3366'; 
             typo += `<rect x="${pad}" y="${boxY + sideW*0.25}" width="${sideW - (pad*2)}" height="${sideW - (pad*2)}" fill="none" stroke="${boxCol}" stroke-width="4" />`;
@@ -648,9 +665,10 @@
             let tSize = sideW * 0.55;
             typo += `<text x="${-h + (w*0.48)}" y="${sideW - pad}" transform="rotate(-90)" font-weight="900" font-size="${tSize}" fill="${p.text}" letter-spacing="${tSize * 0.02}">${panel.title}</text>`;
             
-            typo += `<text x="${pad}" y="${pad*2}" font-weight="900" font-size="${sideW * 0.12}" fill="${p.text}" letter-spacing="-1">DESIGN</text>`;
-            typo += `<text x="${pad}" y="${pad*2 + sideW*0.12}" font-weight="900" font-size="${sideW * 0.12}" fill="${p.text}" letter-spacing="-1">DYNAMIC</text>`;
-            typo += `<text x="${pad}" y="${pad*2 + sideW*0.24}" font-weight="900" font-size="${sideW * 0.12}" fill="${p.line}" letter-spacing="-1">LAB</text>`;
+            // Updated Main Vertical Titles to Generic words
+            typo += `<text x="${pad}" y="${pad*2}" font-weight="900" font-size="${sideW * 0.12}" fill="${p.text}" letter-spacing="-1">LOREM</text>`;
+            typo += `<text x="${pad}" y="${pad*2 + sideW*0.12}" font-weight="900" font-size="${sideW * 0.12}" fill="${p.text}" letter-spacing="-1">IPSUM</text>`;
+            typo += `<text x="${pad}" y="${pad*2 + sideW*0.24}" font-weight="900" font-size="${sideW * 0.12}" fill="${p.line}" letter-spacing="-1">DOLOR</text>`;
 
             return { pattern, typo };
         }
