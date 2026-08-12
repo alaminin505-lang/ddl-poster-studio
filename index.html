@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Dynamic Lab | Master Halftone Studio</title>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #09090b; --bg-panel: #18181b; --bg-header: #050505;
+            --accent-main: #FF3366; --accent-hover: #e62e5c;
+            --text-main: #f8fafc; --text-muted: #a1a1aa; --border-color: #27272a;
+            --cyan-accent: #00E5FF;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; overflow: hidden; font-size: 13px; }
+
+        /* Login Overlay Styles */
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 9, 11, 0.98); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .login-box { background: #18181b; padding: 40px; border-radius: 12px; border: 1px solid var(--cyan-accent); text-align: center; max-width: 400px; width: 90%; box-shadow: 0 0 40px rgba(0, 229, 255, 0.15); }
+        .login-logo { width: 50px; height: 50px; background: repeating-linear-gradient(45deg, var(--cyan-accent), var(--cyan-accent) 4px, transparent 4px, transparent 8px); border-radius: 8px; margin: 0 auto 20px; border: 2px solid var(--cyan-accent); }
+        .login-title { font-size: 20px; font-weight: 900; color: #fff; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .login-desc { color: var(--text-muted); font-size: 13px; margin-bottom: 30px; line-height: 1.5; }
+        
+        .google-btn { display: flex; align-items: center; justify-content: center; gap: 10px; background: #fff; color: #000; border: none; padding: 12px 20px; border-radius: 6px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; }
+        .google-btn:hover { background: #f1f5f9; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255,255,255,0.2); }
+        .google-icon { width: 20px; height: 20px; }
+
+        .header { height: 65px; background-color: var(--bg-header); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; }
+        .workspace { display: flex; flex: 1; overflow: hidden; }
+        
+        .sidebar { width: 380px; background-color: var(--bg-panel); overflow-y: auto; display: flex; flex-direction: column; flex-shrink: 0; padding-bottom: 30px; border-right: 1px solid var(--border-color); }
+        .sidebar::-webkit-scrollbar { width: 6px; } .sidebar::-webkit-scrollbar-thumb { background: var(--accent-main); border-radius: 3px; }
+        
+        .main-canvas-area { 
+            flex: 1; display: flex; align-items: center; justify-content: center; 
+            background-color: var(--bg-main); padding: 40px; overflow: hidden; 
+            background-image: linear-gradient(#18181b 2px, transparent 2px), linear-gradient(90deg, #18181b 2px, transparent 2px); background-size: 40px 40px;
+        }
+        
+        #svg-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        #svg-container svg { width: 100%; max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 1); border: 1px solid var(--border-color); background: #fff; }
+
+        .header-left, .header-right { display: flex; align-items: center; gap: 12px; }
+        .logo { font-weight: 900; font-size: 16px; color: #fff; display: flex; align-items: center; gap: 10px; letter-spacing: 0.5px;}
+        .logo-icon { width: 28px; height: 28px; background: repeating-linear-gradient(45deg, var(--accent-main), var(--accent-main) 3px, transparent 3px, transparent 6px); border-radius: 4px; display: grid; place-items: center; border: 1px solid var(--accent-main);} 
+        
+        .btn { border: none; padding: 10px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; text-transform: uppercase; letter-spacing: 0.5px;}
+        .btn:hover { filter: brightness(1.1); }
+        
+        .panel-section { padding: 20px 24px; border-bottom: 1px solid var(--border-color); }
+        .section-title { font-size: 12px; text-transform: uppercase; color: var(--accent-main); margin-bottom: 16px; font-weight: 800; letter-spacing: 1px; display: flex; justify-content: space-between;}
+        
+        .control-group { margin-bottom: 15px; }
+        .control-label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;}
+        
+        input[type="text"], select.modern-select, input[type="number"] { width: 100%; background: #09090b; border: 1px solid var(--border-color); color: #fff; padding: 10px; border-radius: 4px; font-size: 13px; outline: none; font-weight: 600;}
+        input[type="text"]:focus, select.modern-select:focus, input[type="number"]:focus { border-color: var(--accent-main); }
+        
+        .color-picker-row { display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center; font-size: 11px; color: var(--text-main); font-weight: 600; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 4px; border: 1px solid var(--border-color); text-transform: uppercase;}
+        input[type="color"] { border: none; width: 28px; height: 28px; border-radius: 2px; cursor: pointer; background: none; }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; } input[type="color"]::-webkit-color-swatch { border: 1px solid rgba(255,255,255,0.2); border-radius: 2px; }
+
+        input[type=range] { -webkit-appearance: none; background: transparent; padding: 0; width: 100%; margin-top: 5px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 12px; border-radius: 2px; background: var(--accent-main); cursor: pointer; margin-top: -6px;}
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: var(--border-color); border-radius: 2px; }
+
+        .console { height: 35px; background-color: var(--bg-header); border-top: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 24px; font-family: monospace; font-size: 11px; color: var(--accent-main); justify-content: space-between; flex-shrink: 0;}
+
+        /* Payment Modal */
+        #payment-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9,9,11,0.95); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .premium-box { background: #111114; border: 1px solid var(--cyan-accent); border-radius: 12px; width: 95%; max-width: 500px; padding: 30px; box-shadow: 0 0 30px rgba(0, 229, 255, 0.1); max-height: 95vh; overflow-y: auto; }
+        .premium-title { text-align: center; color: #fff; font-size: 20px; font-weight: 900; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .single-pkg-card { background: #18181b; border: 1px solid var(--cyan-accent); border-radius: 8px; padding: 25px 15px; text-align: center; margin-bottom: 25px; position: relative; }
+        .pkg-price { font-size: 32px; font-weight: 900; color: #fff; margin-bottom: 5px; }
+        .pkg-renders { font-size: 16px; font-weight: bold; color: var(--cyan-accent); margin-bottom: 8px; text-transform: uppercase;}
+        .pkg-method { font-size: 12px; color: #888; }
+        .badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 900; color: #fff; text-transform: uppercase; background: #00C853; }
+
+        .payment-form { border: 1px dashed #333; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 20px; }
+        .instruction { font-size: 14px; color: #fff; margin-bottom: 5px; }
+        .instruction-amount { color: var(--cyan-accent); font-weight: bold; }
+        .bkash-num { font-size: 24px; font-weight: 900; color: var(--cyan-accent); margin-bottom: 20px; display: block; letter-spacing: 1px;}
+        
+        .input-group-row { display: flex; flex-direction: column; gap: 15px; text-align: left; margin-bottom: 15px;}
+        .input-label { font-size: 10px; font-weight: 800; color: #888; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .pay-input { width: 100%; background: #09090b; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 6px; outline: none; font-size: 14px; transition: 0.2s;}
+        .pay-input:focus { border-color: var(--cyan-accent); }
+
+        .btn-submit { background: var(--cyan-accent); color: #000; border: none; padding: 14px; width: 100%; font-weight: 900; font-size: 14px; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.2s; margin-bottom: 10px;}
+        .btn-submit:hover { filter: brightness(1.1); }
+
+        #unlock-section-toggle { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #333;}
+
+        .help-text { font-size: 12px; color: #888; text-align: center; margin-bottom: 15px; }
+        .btn-whatsapp { background: transparent; border: 1px solid #00C853; color: #00C853; width: 100%; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; margin-bottom: 15px; }
+        .btn-cancel { background: transparent; border: none; color: #888; text-decoration: underline; cursor: pointer; font-size: 13px; display: block; width: 100%; text-align: center; }
+
+        .download-btn { background: #333; color: #888; border: 1px solid #444; width: 100%; padding: 15px; font-size: 14px;}
+        .download-btn.unlocked { background: #2ea043; color: #fff; border: none; }
+
+        details { background: #09090b; border: 1px solid var(--border-color); border-radius: 4px; margin-bottom: 10px; }
+        summary { padding: 12px 14px; font-size: 11px; font-weight: 800; color: #fff; text-transform: uppercase; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+        summary::-webkit-details-marker { display: none; }
+        summary::after { content: "▼"; font-size: 9px; color: var(--accent-main); }
+        details[open] summary::after { content: "▲"; }
+        .details-content { padding: 14px; border-top: 1px solid var(--border-color); background: #121215; }
+        
+        .user-profile { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 5px 12px; border-radius: 20px; }
+        .user-profile img { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--cyan-accent); }
+    </style>
+</head>
+<body>
+
+    <!-- Google Login Overlay -->
+    <div id="login-overlay">
+        <div class="login-box">
+            <div class="login-logo"></div>
+            <div class="login-title">Design Dynamic Lab</div>
+            <div class="login-desc">Sign in with your Google account to access and track your studio session securely.</div>
+            
+            <button class="google-btn" id="btn-google-login">
+                <svg class="google-icon" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Sign in with Google
+            </button>
+            <div id="login-error" style="color: #FF3366; font-size: 11px; margin-top: 15px; font-weight: bold; display: none;">Login failed. Please enable Google Auth in Firebase console.</div>
+        </div>
+    </div>
+
+    <!-- Payment & Unlock Modal -->
+    <div id="payment-modal">
+        <div class="premium-box">
+            <div class="premium-title">PREMIUM ACCESS</div>
+            
+            <div class="single-pkg-card">
+                <div class="badge">UNLIMITED ACCESS</div>
+                <div class="pkg-price">৳100</div>
+                <div class="pkg-renders">Unlimited Renders & Downloads</div>
+                <div class="pkg-method">bKash / Nagad Accepted</div>
+            </div>
+
+            <div class="payment-form">
+                <div class="instruction">Send exactly <span class="instruction-amount">৳100</span> via bKash/Nagad to:</div>
+                <div class="bkash-num">01646348167 <span style="font-size:12px; color:#888; font-weight:normal;">(Personal)</span></div>
+                
+                <div class="input-group-row">
+                    <div class="input-box" style="margin-bottom:10px;">
+                        <label class="input-label">YOUR NUMBER / EMAIL</label>
+                        <input type="text" id="pay-sender" class="pay-input" placeholder="e.g. 017XXXXXXXX">
+                    </div>
+                    <div class="input-box">
+                        <label class="input-label">TRANSACTION ID (TRXID)</label>
+                        <input type="text" id="pay-trxid" class="pay-input" placeholder="e.g. 9B5XQ7YZ">
+                    </div>
+                </div>
+                
+                <button class="btn-submit" id="btn-submit-verification" onclick="submitVerification()">SUBMIT FOR VERIFICATION</button>
+                
+                <div id="unlock-section-toggle">
+                    <label class="input-label" style="text-align: center; color: var(--cyan-accent);">ENTER DAILY SECRET CODE</label>
+                    <input type="text" id="inp-secret-code" class="pay-input" style="text-align: center; margin-bottom: 15px; font-weight:bold; letter-spacing: 2px; font-size:16px;" placeholder="e.g. DDL1208">
+                    <button class="btn-submit" style="background: #00C853; color: #fff;" onclick="checkUnlockCode()">UNLOCK MASTERBOARD</button>
+                </div>
+            </div>
+
+            <div class="help-text">Need help? Message us with your TrxID on WhatsApp.</div>
+            <button class="btn-whatsapp" onclick="window.open('https://wa.me/8801646348167', '_blank')">Message on WhatsApp</button>
+            <button class="btn-cancel" onclick="document.getElementById('payment-modal').style.display='none'">Cancel & Return</button>
+        </div>
+    </div>
+
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon"></div>
+                DESIGN DYNAMIC LAB
+            </div>
+            <div style="color: #a1a1aa; font-size: 11px; margin-left: 10px; border-left: 1px solid #333; padding-left: 10px;">Master Poster Generator</div>
+        </div>
+        <div class="header-right">
+            <div class="user-profile" id="user-profile" style="display: none;">
+                <img id="user-avatar" src="" alt="User">
+                <span id="user-name">Guest</span>
+            </div>
+            <button class="btn" onclick="document.getElementById('payment-modal').style.display='flex'" style="background: var(--cyan-accent); color: #000;">⚡ UPGRADE TO PRO</button>
+            <button class="btn" id="btn-shuffle" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border-color);">⟳ Shuffle Styles</button>
+        </div>
+    </header>
+
+    <div class="workspace">
+        <aside class="sidebar sidebar-left">
+            
+            <div class="panel-section">
+                <div class="section-title">🎨 কাস্টমাইজেশন (CUSTOMIZE PANELS)</div>
+                
+                <details open>
+                    <summary>Poster 1 (Far Left)</summary>
+                    <div class="details-content">
+                        <div class="control-group">
+                            <div class="control-label">Title / টাইটেল</div>
+                            <input type="text" id="inp-title-0" maxlength="15" class="panel-input" data-index="0">
+                        </div>
+                        <div class="color-picker-row">Background <input type="color" id="inp-bg-0" class="panel-input" data-index="0"></div>
+                        <div class="color-picker-row">Line & Shape <input type="color" id="inp-line-0" class="panel-input" data-index="0"></div>
+                        <div class="color-picker-row">Typo Box <input type="color" id="inp-typo-0" class="panel-input" data-index="0"></div>
+                        <div class="color-picker-row">Main Text <input type="color" id="inp-text-0" class="panel-input" data-index="0"></div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Poster 2 (Center Left)</summary>
+                    <div class="details-content">
+                        <div class="control-group">
+                            <div class="control-label">Title / টাইটেল</div>
+                            <input type="text" id="inp-title-1" maxlength="15" class="panel-input" data-index="1">
+                        </div>
+                        <div class="color-picker-row">Background <input type="color" id="inp-bg-1" class="panel-input" data-index="1"></div>
+                        <div class="color-picker-row">Line & Shape <input type="color" id="inp-line-1" class="panel-input" data-index="1"></div>
+                        <div class="color-picker-row">Typo Box <input type="color" id="inp-typo-1" class="panel-input" data-index="1"></div>
+                        <div class="color-picker-row">Main Text <input type="color" id="inp-text-1" class="panel-input" data-index="1"></div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Poster 3 (Center Right)</summary>
+                    <div class="details-content">
+                        <div class="control-group">
+                            <div class="control-label">Title / টাইটেল</div>
+                            <input type="text" id="inp-title-2" maxlength="15" class="panel-input" data-index="2">
+                        </div>
+                        <div class="color-picker-row">Background <input type="color" id="inp-bg-2" class="panel-input" data-index="2"></div>
+                        <div class="color-picker-row">Line & Shape <input type="color" id="inp-line-2" class="panel-input" data-index="2"></div>
+                        <div class="color-picker-row">Typo Box <input type="color" id="inp-typo-2" class="panel-input" data-index="2"></div>
+                        <div class="color-picker-row">Main Text <input type="color" id="inp-text-2" class="panel-input" data-index="2"></div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Poster 4 (Far Right)</summary>
+                    <div class="details-content">
+                        <div class="control-group">
+                            <div class="control-label">Title / টাইটেল</div>
+                            <input type="text" id="inp-title-3" maxlength="15" class="panel-input" data-index="3">
+                        </div>
+                        <div class="color-picker-row">Background <input type="color" id="inp-bg-3" class="panel-input" data-index="3"></div>
+                        <div class="color-picker-row">Line & Shape <input type="color" id="inp-line-3" class="panel-input" data-index="3"></div>
+                        <div class="color-picker-row">Typo Box <input type="color" id="inp-typo-3" class="panel-input" data-index="3"></div>
+                        <div class="color-picker-row">Main Text <input type="color" id="inp-text-3" class="panel-input" data-index="3"></div>
+                    </div>
+                </details>
+            </div>
+
+            <div class="panel-section">
+                <div class="section-title">⚙️ ইঞ্জিন সেটিংস (ENGINE SETTINGS)</div>
+                <div class="control-group">
+                    <div class="control-label"><span>Base Density / ঘনত্ব</span><span id="val-density">80</span></div>
+                    <input type="range" id="inp-density" min="30" max="200" value="80">
+                </div>
+                <div class="control-group">
+                    <div class="control-label"><span>Wave Frequency / ওয়েভ</span><span id="val-freq">40%</span></div>
+                    <input type="range" id="inp-freq" min="10" max="100" value="40">
+                </div>
+                <div class="control-group">
+                    <div class="control-label"><span>Base Thickness / পুরুত্ব</span><span id="val-thick">25px</span></div>
+                    <input type="range" id="inp-thick" min="5" max="80" value="25">
+                </div>
+            </div>
+
+            <div class="panel-section" style="background: rgba(0, 229, 255, 0.05);">
+                <div class="section-title" style="color: var(--cyan-accent);">📥 মাস্টার ডাউনলোড (DOWNLOAD)</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 12px; line-height:1.4;">Premium access required. Downloads the entire 4-in-1 Master Artboard as a single SVG file.</div>
+                
+                <button class="btn download-btn" id="btn-download-master" onclick="handleMasterDownload()">🔒 Download 4-in-1 Masterboard</button>
+            </div>
+
+        </aside>
+
+        <main class="main-canvas-area">
+            <div id="svg-container"></div>
+        </main>
+    </div>
+
+    <footer class="console">
+        <span id="console-msg">System Ready. Please sign in to continue...</span>
+        <span id="dimension-msg" style="color: var(--text-muted);">Master Artboard: 7320 x 2520 px</span>
+    </footer>
+
+    <script>
+        // ==========================================
+        // FIREBASE INITIALIZATION & AUTH & DB
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3rBFfYR4E1W7sjFVzEcjVgUQiNZTqgno",
+            authDomain: "poster-a5446.firebaseapp.com",
+            projectId: "poster-a5446",
+            storageBucket: "poster-a5446.firebasestorage.app",
+            messagingSenderId: "574561652944",
+            appId: "1:574561652944:web:fee36da6240fe38685ced5",
+            measurementId: "G-5BVZ7Q1B74"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const loginOverlay = document.getElementById('login-overlay');
+        const btnGoogleLogin = document.getElementById('btn-google-login');
+        const loginError = document.getElementById('login-error');
+        const userProfile = document.getElementById('user-profile');
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+
+        // Track Auth State & Save User to Firestore Database automatically
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                loginOverlay.style.display = 'none';
+                userProfile.style.display = 'flex';
+                userName.innerText = user.displayName ? user.displayName.split(' ')[0] : 'User';
+                userAvatar.src = user.photoURL || 'https://ui-avatars.com/api/?name=User&background=00E5FF&color=000';
+
+                // Save user info to Firestore database so you can track users in Firebase Console
+                db.collection("users").doc(user.uid).set({
+                    uid: user.uid,
+                    name: user.displayName,
+                    email: user.email,
+                    photo: user.photoURL,
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true }).catch((err) => console.log(err));
+
+                logConsole(`Welcome back, ${user.displayName}! Session active.`);
+            } else {
+                loginOverlay.style.display = 'flex';
+                userProfile.style.display = 'none';
+            }
+        });
+
+        btnGoogleLogin.addEventListener('click', () => {
+            btnGoogleLogin.innerHTML = 'Connecting...';
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch((error) => {
+                console.error("Login Error: ", error);
+                loginError.style.display = 'block';
+                btnGoogleLogin.innerHTML = 'Sign in with Google';
+            });
+        });
+
+        // ==========================================
+        // PAYMENT & UNLOCK LOGIC
+        // ==========================================
+        function submitVerification() {
+            const sender = document.getElementById('pay-sender').value.trim();
+            const trxid = document.getElementById('pay-trxid').value.trim();
+            const btn = document.getElementById('btn-submit-verification');
+
+            if(sender === '' || trxid === '') {
+                alert('Please enter both your Number/Email and Transaction ID.');
+                return;
+            }
+
+            btn.innerText = 'VERIFYING...';
+            btn.style.pointerEvents = 'none';
+
+            setTimeout(() => {
+                btn.innerText = 'VERIFICATION REQUEST SENT!';
+                btn.style.background = '#00C853';
+                btn.style.color = '#fff';
+                alert('Verification request sent successfully!\nPlease message us on WhatsApp with your TrxID to get your Daily Secret Code.');
+                document.getElementById('unlock-section-toggle').style.display = 'block';
+            }, 1500);
+        }
+
+        let isPremiumUser = false;
+
+        function checkUnlockCode() {
+            const codeInput = document.getElementById('inp-secret-code').value.toUpperCase().trim();
+            
+            const today = new Date();
+            let day = today.getDate();
+            let month = today.getMonth() + 1; 
+            
+            day = day < 10 ? '0' + day : day;
+            month = month < 10 ? '0' + month : month;
+            
+            const SECRET_PASSCODE = "DDL" + day + month; 
+
+            if (codeInput === SECRET_PASSCODE) {
+                isPremiumUser = true;
+                document.getElementById('payment-modal').style.display = 'none';
+                
+                const btnMaster = document.getElementById('btn-download-master');
+                btnMaster.classList.add('unlocked');
+                btnMaster.innerHTML = '↓ Download 4-in-1 Masterboard';
+                
+                logConsole("Premium Access Granted! Valid for today only.");
+                alert("Success! The master download button is now unlocked for today.");
+            } else {
+                alert("Invalid or Expired Code! Please make sure you have today's code.");
+            }
+        }
+
+        function handleMasterDownload() {
+            if (!isPremiumUser) {
+                document.getElementById('payment-modal').style.display = 'flex';
+                return;
+            }
+            executeMasterDownload();
+        }
+
+        // ==========================================
+        // ENGINE & GENERATOR LOGIC
+        // ==========================================
+        const svgContainer = document.getElementById('svg-container');
+        const consoleMsg = document.getElementById('console-msg');
+        let globalSeed = Math.random() * 100000;
+        
+        const w = 1800; const h = 2520; const gap = 40;
+
+        const inputs = {
+            density: document.getElementById('inp-density'),
+            freq: document.getElementById('inp-freq'),
+            thick: document.getElementById('inp-thick')
+        };
+        const vals = {
+            density: document.getElementById('val-density'),
+            freq: document.getElementById('val-freq'),
+            thick: document.getElementById('val-thick')
+        };
+
+        const patternTypes = ['chevron', 'wavy', 'vertical', 'concentric', 'mesh', 'glitch', 'diagonal', 'magnetic', 'dashed_circle', 'arched'];
+        const colorPalettes = [
+            { bg: '#E4E3DF', line: '#1C212E', typo: '#E4E3DF', text: '#1C212E' },
+            { bg: '#1C212E', line: '#E4E3DF', typo: '#E4E3DF', text: '#1C212E' },
+            { bg: '#E3242B', line: '#0B1021', typo: '#E3242B', text: '#FFFFFF' },
+            { bg: '#FFD700', line: '#111111', typo: '#FFD700', text: '#111111' },
+            { bg: '#4A1D23', line: '#F4F1EA', typo: '#4A1D23', text: '#FFFFFF' },
+            { bg: '#1434A4', line: '#0B1021', typo: '#1434A4', text: '#F0E6D2' },
+            { bg: '#CBA135', line: '#2A2A2A', typo: '#CBA135', text: '#FFFFFF' },
+            { bg: '#FFB6C1', line: '#E3242B', typo: '#FFB6C1', text: '#FFFFFF' },
+            { bg: '#BFFF00', line: '#1C212E', typo: '#BFFF00', text: '#1C212E' },
+            { bg: '#F0E6D2', line: '#1A2436', typo: '#F0E6D2', text: '#8CB83C' }
+        ];
+        const titles = ['DESIGN', 'DYNAMIC', 'LAB', 'POSTER', 'BENGALI', 'ENGLISH', 'STUDIO', 'HALFTONE', 'VORTEX', 'VECTOR'];
+
+        let activePanels = [];
+
+        function shuffleArray(arr) {
+            let array = [...arr];
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function randomizePanels() {
+            activePanels = [];
+            let shuffledTypes = shuffleArray(patternTypes);
+            let shuffledPalettes = shuffleArray(colorPalettes);
+            let shuffledTitles = shuffleArray(titles);
+
+            for(let i = 0; i < 4; i++) {
+                activePanels.push({
+                    type: shuffledTypes[i],
+                    palette: JSON.parse(JSON.stringify(shuffledPalettes[i])),
+                    title: shuffledTitles[i],
+                    id: Math.floor(Math.random() * 90) + 10
+                });
+            }
+            syncAllCustomizeUIs();
+        }
+
+        function syncAllCustomizeUIs() {
+            for(let i = 0; i < 4; i++) {
+                document.getElementById(`inp-title-${i}`).value = activePanels[i].title;
+                document.getElementById(`inp-bg-${i}`).value = activePanels[i].palette.bg;
+                document.getElementById(`inp-line-${i}`).value = activePanels[i].palette.line;
+                document.getElementById(`inp-typo-${i}`).value = activePanels[i].palette.typo;
+                document.getElementById(`inp-text-${i}`).value = activePanels[i].palette.text;
+            }
+        }
+
+        function applyCustomizations(event) {
+            let index = event.target.getAttribute('data-index');
+            if(index !== null) {
+                activePanels[index].title = document.getElementById(`inp-title-${index}`).value || 'POSTER';
+                activePanels[index].palette.bg = document.getElementById(`inp-bg-${index}`).value;
+                activePanels[index].palette.line = document.getElementById(`inp-line-${index}`).value;
+                activePanels[index].palette.typo = document.getElementById(`inp-typo-${index}`).value;
+                activePanels[index].palette.text = document.getElementById(`inp-text-${index}`).value;
+                updateView();
+            }
+        }
+
+        document.querySelectorAll('.panel-input').forEach(input => {
+            input.addEventListener('input', applyCustomizations);
+        });
+
+        const mapRange = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
+        function getRnd(min, max, seed) { let x = Math.sin(seed) * 10000; return (x - Math.floor(x)) * (max - min) + min; }
+
+        function getPosterElements(panel, index, globalDensity, globalFreq, globalThick) {
+            let pattern = ''; 
+            let pSeed = globalSeed * (index + 1.23);
+            let p = panel.palette;
+            
+            let d = Math.floor(globalDensity * getRnd(0.5, 1.6, pSeed)); 
+            let mThick = globalThick * getRnd(0.4, 2.0, pSeed+1); 
+            let lFreq = globalFreq * getRnd(0.5, 1.8, pSeed+2); 
+            
+            let linesAmt = Math.floor(d * 1.5); 
+            let phaseShift = getRnd(0, Math.PI, pSeed);
+
+            if (panel.type === 'chevron') {
+                for (let i = 0; i <= linesAmt; i++) {
+                    let yPos = mapRange(i, 0, linesAmt, -h*0.2, h*1.2);
+                    let sw = (Math.sin((i * 0.1 * lFreq) + phaseShift) + 1) * (mThick / 2) + 0.5;
+                    pattern += `<path d="M 0,${yPos} L ${w*0.5},${yPos + h*0.15} L ${w},${yPos}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}" stroke-linejoin="miter"/>\n`;
+                }
+            } else if (panel.type === 'wavy') {
+                for (let i = 0; i <= linesAmt; i++) {
+                    let yPos = mapRange(i, 0, linesAmt, -h*0.2, h*1.2);
+                    let sw = (Math.sin((i * 0.12 * lFreq) + phaseShift) + 1) * (mThick / 2) + 0.5;
+                    let curve = Math.cos((i * 0.08 * lFreq) + phaseShift) * (h * 0.3);
+                    pattern += `<path d="M 0,${yPos} Q ${w*0.5},${yPos + curve} ${w},${yPos}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}"/>\n`;
+                }
+            } else if (panel.type === 'vertical') {
+                for (let i = 0; i <= d * 2; i++) {
+                    let xPos = mapRange(i, 0, d * 2, 0, w);
+                    let sw = (Math.sin((i * 0.1 * lFreq) + phaseShift) + 1) * (mThick / 2) + 0.5;
+                    pattern += `<path d="M ${xPos},0 L ${xPos},${h}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}"/>\n`;
+                }
+            } else if (panel.type === 'concentric') {
+                let rings = d * 1.2; let cx = w * getRnd(0.2, 0.8, pSeed); let cy = h * getRnd(0.2, 0.8, pSeed+1);
+                for (let i = 1; i <= rings; i++) {
+                    let r = mapRange(i, 0, rings, 10, w*1.5);
+                    let sw = (Math.sin((i * 0.15 * lFreq) + phaseShift) + 1) * (mThick / 2) + 0.5;
+                    pattern += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}" />\n`;
+                }
+            } else if (panel.type === 'mesh') {
+                for (let i = 0; i <= d; i++) {
+                    let y = mapRange(i, 0, d, 0, h); let sw = (Math.sin((i * 0.15 * lFreq) + phaseShift) + 1) * (mThick*0.4) + 0.5;
+                    pattern += `<path d="M 0,${y} Q ${w/2},${y + h*0.2} ${w},${y}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}"/>\n`;
+                }
+                for (let i = 0; i <= d; i++) {
+                    let x = mapRange(i, 0, d, 0, w); let sw = (Math.cos((i * 0.15 * lFreq) + phaseShift) + 1) * (mThick*0.4) + 0.5;
+                    pattern += `<path d="M ${x},0 Q ${x + w*0.2},${h/2} ${x},${h}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}"/>\n`;
+                }
+            } else if (panel.type === 'glitch') {
+                for (let r = 0; r < d; r++) {
+                    let y = mapRange(r, 0, d, 0, h); let blockH = (h / d) * getRnd(0.5, 1.2, pSeed+r);
+                    let segs = Math.floor(getRnd(2, 6, pSeed+r)); let cX = 0;
+                    for (let s = 0; s < segs; s++) {
+                        let segW = getRnd(w*0.05, w*0.5, pSeed+r+s); if (cX + segW > w) segW = w - cX;
+                        if (getRnd(0, 1, pSeed+r*3+s) > 0.3) {
+                            let yOff = (Math.sin(r * lFreq * 0.1) * mThick*0.5);
+                            pattern += `<rect x="${cX}" y="${y + yOff}" width="${segW}" height="${blockH}" fill="${p.line}" />\n`;
+                        }
+                        cX += segW + getRnd(5, 30, pSeed+r*4+s); if(cX >= w) break;
+                    }
+                }
+            } else if (panel.type === 'diagonal') {
+                let diagAmt = d * 2.5;
+                for (let i = 0; i <= diagAmt; i++) {
+                    let yPos = mapRange(i, 0, diagAmt, -h, h * 1.5);
+                    let sw = (Math.sin((i * 0.1 * lFreq) + phaseShift) + 1) * (mThick / 2) + 0.5;
+                    pattern += `<path d="M 0,${yPos} L ${w},${yPos - h*0.8}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}"/>\n`;
+                }
+            } else if (panel.type === 'magnetic') {
+                let cx = w/2 + (Math.sin(pSeed)*w*0.3); let cy = h/2 + (Math.cos(pSeed)*h*0.3);
+                for (let i = 0; i <= linesAmt; i++) {
+                    let yPos = mapRange(i, 0, linesAmt, -h*0.2, h*1.2);
+                    let sw = (Math.sin((i * 0.1 * lFreq) + phaseShift) + 1) * (mThick / 2) + 0.5;
+                    pattern += `<path d="M 0,${yPos} Q ${cx},${cy} ${w},${yPos}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}"/>\n`;
+                }
+            } else if (panel.type === 'dashed_circle') {
+                let rings = d * 1.2; let cx = w/2; let cy = h/2;
+                for (let i = 1; i <= rings; i++) {
+                    let r = mapRange(i, 0, rings, 10, w*1.2);
+                    let sw = (Math.sin((i * 0.15 * lFreq) + phaseShift) + 1) * (mThick / 2) + 0.5;
+                    let dash = `${getRnd(10, 80, pSeed+i)} ${getRnd(10, 50, pSeed+i*2)}`;
+                    pattern += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}" stroke-dasharray="${dash}" />\n`;
+                }
+            } else if (panel.type === 'arched') {
+                for (let i = 0; i <= linesAmt; i++) {
+                    let r = mapRange(i, 0, linesAmt, w*0.1, w*2.5);
+                    let sw = (Math.sin((i * 0.1 * lFreq) + phaseShift) + 1) * (mThick / 2) + 0.5;
+                    pattern += `<circle cx="0" cy="${h}" r="${r}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}" />\n`;
+                }
+            }
+
+            const sideW = w * 0.12; const pad = sideW * 0.25;
+            let typo = `<rect x="0" y="0" width="${sideW}" height="${h}" fill="${p.typo}" />`;
+            typo += `<line x1="${sideW}" y1="0" x2="${sideW}" y2="${h}" stroke="${p.line}" stroke-width="4" />`;
+            
+            let txt = "Design Dynamic Lab - Premium Poster Studio.";
+            typo += `<text x="${-h + pad}" y="${pad * 1.5}" transform="rotate(-90)" font-weight="600" font-size="${sideW * 0.08}" fill="${p.line}" opacity="0.6">${txt}</text>`;
+            typo += `<text x="${-h + pad}" y="${pad * 2.2}" transform="rotate(-90)" font-weight="600" font-size="${sideW * 0.08}" fill="${p.line}" opacity="0.6">${txt}</text>`;
+            
+            let boxY = h - (w * 0.45);
+            typo += `<text x="${pad}" y="${boxY}" font-weight="900" font-size="${sideW * 0.15}" fill="${p.line}">DDL</text>`;
+            typo += `<text x="${pad}" y="${boxY + sideW*0.12}" font-weight="700" font-size="${sideW * 0.12}" fill="${p.line}">#0${panel.id}</text>`;
+            let boxCol = (p.bg === '#1C212E' || p.bg === '#09090b') ? '#00E5FF' : '#FF3366'; 
+            typo += `<rect x="${pad}" y="${boxY + sideW*0.25}" width="${sideW - (pad*2)}" height="${sideW - (pad*2)}" fill="none" stroke="${boxCol}" stroke-width="4" />`;
+
+            let tSize = sideW * 0.55;
+            typo += `<text x="${-h + (w*0.48)}" y="${sideW - pad}" transform="rotate(-90)" font-weight="900" font-size="${tSize}" fill="${p.text}" letter-spacing="${tSize * 0.02}">${panel.title}</text>`;
+            
+            typo += `<text x="${pad}" y="${pad*2}" font-weight="900" font-size="${sideW * 0.12}" fill="${p.text}" letter-spacing="-1">DESIGN</text>`;
+            typo += `<text x="${pad}" y="${pad*2 + sideW*0.12}" font-weight="900" font-size="${sideW * 0.12}" fill="${p.text}" letter-spacing="-1">DYNAMIC</text>`;
+            typo += `<text x="${pad}" y="${pad*2 + sideW*0.24}" font-weight="900" font-size="${sideW * 0.12}" fill="${p.line}" letter-spacing="-1">LAB</text>`;
+
+            return { pattern, typo };
+        }
+
+        function buildMasterSVG() {
+            const density = parseInt(inputs.density.value); 
+            const freq = parseInt(inputs.freq.value) / 100; 
+            const maxThick = parseInt(inputs.thick.value);
+            
+            const totalWidth = (w * 4) + (gap * 3); 
+            const totalHeight = h;
+
+            let allPanelsSVG = '';
+            activePanels.forEach((panel, index) => {
+                let elems = getPosterElements(panel, index, density, freq, maxThick);
+                let pX = index * (w + gap);
+                
+                allPanelsSVG += `
+                    <g transform="translate(${pX}, 0)">
+                        <rect width="${w}" height="${h}" fill="${panel.palette.bg}" />
+                        <g clip-path="url(#clip-${index})">${elems.pattern}</g>
+                        <g font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">${elems.typo}</g>
+                    </g>`;
+            });
+
+            return `<?xml version="1.0" encoding="utf-8"?>
+            <svg xmlns="http://www.w3.org/2000/svg" width="${totalWidth}" height="${totalHeight}" viewBox="0 0 ${totalWidth} ${totalHeight}">
+                <defs>${activePanels.map((_, i) => `<clipPath id="clip-${i}"><rect width="${w}" height="${h}"/></clipPath>`).join('\n')}</defs>
+                <rect width="${totalWidth}" height="${totalHeight}" fill="#ffffff" />
+                ${allPanelsSVG}
+            </svg>`;
+        }
+
+        function updateView() {
+            vals.density.innerText = inputs.density.value; 
+            vals.freq.innerText = inputs.freq.value + '%'; 
+            vals.thick.innerText = inputs.thick.value + 'px';
+            
+            const svgStr = buildMasterSVG();
+            const displaySVG = svgStr.replace('<?xml version="1.0" encoding="utf-8"?>\n', '');
+            
+            const totalWidth = (w * 4) + (gap * 3);
+            svgContainer.style.aspectRatio = `${totalWidth} / ${h}`;
+            svgContainer.innerHTML = displaySVG;
+        }
+
+        function executeMasterDownload() {
+            const svgStr = buildMasterSVG();
+            const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob); 
+            const a = document.createElement('a');
+            
+            a.href = url; 
+            a.download = `DDL_MasterBoard_${Date.now()}.svg`;
+            document.body.appendChild(a); 
+            a.click();
+            
+            setTimeout(() => { document.body.removeChild(a); window.URL.revokeObjectURL(url); }, 100);
+            logConsole("4-in-1 Master Artboard Downloaded Successfully!");
+        }
+
+        function logConsole(msg) { consoleMsg.innerHTML = `${msg}`; }
+
+        Object.values(inputs).forEach(el => { if(el) { el.addEventListener('input', updateView); el.addEventListener('change', updateView); } });
+        document.getElementById('btn-shuffle').addEventListener('click', () => { globalSeed = Math.random() * 100000; randomizePanels(); updateView(); logConsole("Styles shuffled!"); });
+        
+        randomizePanels();
+        updateView();
+    </script>
+</body>
+</html>
