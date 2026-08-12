@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Design Dynamic Lab | Master Halftone Studio</title>
     
-    <!-- Firebase SDKs (Compat version) -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
@@ -405,7 +405,7 @@
         }
 
         // ==========================================
-        // PAYMENT & DEPOSIT LOGIC
+        // PAYMENT & DEPOSIT LOGIC (BYPASS REMOVED TO CATCH ACTUAL ERRORS)
         // ==========================================
         function openPaymentModal() {
             if (isUserPro) {
@@ -439,14 +439,18 @@
                 status: "Pending"
             };
 
-            let isCompleted = false;
-            setTimeout(() => {
-                if(!isCompleted) { isCompleted = true; showSuccessUI(); }
-            }, 3000);
-
+            // সরাসরি ডাটাবেসে পুশ করার চেষ্টা করবে, কোনো ফেক সাকসেস দেখাবে না
             db.collection("deposits").add(depositData)
-              .then(() => { if(!isCompleted) { isCompleted = true; showSuccessUI(); } })
-              .catch((error) => { console.error("Error adding deposit: ", error); if(!isCompleted) { isCompleted = true; showSuccessUI(); } });
+              .then(() => { 
+                  showSuccessUI(); 
+              })
+              .catch((error) => { 
+                  // আসল সমস্যাটা এখানে স্ক্রিনে পপ-আপ করে দেখাবে
+                  alert("Firebase Data Error: \n" + error.message + "\n\n(Note: Check your Firestore Database Rules, make sure they are published to 'true')");
+                  console.error("Error adding deposit: ", error); 
+                  btn.innerText = 'SUBMIT PAYMENT REQUEST';
+                  btn.style.pointerEvents = 'auto';
+              });
         }
 
         function showSuccessUI() {
