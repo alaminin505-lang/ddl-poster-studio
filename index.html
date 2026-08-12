@@ -81,7 +81,6 @@
         .single-pkg-card { background: #18181b; border: 1px solid var(--cyan-accent); border-radius: 8px; padding: 25px 15px; text-align: center; margin-bottom: 25px; position: relative; }
         .pkg-price { font-size: 32px; font-weight: 900; color: #fff; margin-bottom: 5px; }
         .pkg-renders { font-size: 16px; font-weight: bold; color: var(--cyan-accent); margin-bottom: 8px; text-transform: uppercase;}
-        .pkg-method { font-size: 12px; color: #888; }
         .badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 900; color: #fff; text-transform: uppercase; background: #00C853; }
 
         .payment-form { border: 1px dashed #333; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 20px; }
@@ -324,15 +323,18 @@
         const userAvatar = document.getElementById('user-avatar');
         const userName = document.getElementById('user-name');
 
+        let currentUser = null;
+
         // Track Auth State & Save User to Firestore Database automatically
         auth.onAuthStateChanged((user) => {
             if (user) {
+                currentUser = user;
                 loginOverlay.style.display = 'none';
                 userProfile.style.display = 'flex';
                 userName.innerText = user.displayName ? user.displayName.split(' ')[0] : 'User';
                 userAvatar.src = user.photoURL || 'https://ui-avatars.com/api/?name=User&background=00E5FF&color=000';
 
-                // Save user info to Firestore database so you can track users in Firebase Console
+                // Save user info to Firestore database
                 db.collection("users").doc(user.uid).set({
                     uid: user.uid,
                     name: user.displayName,
@@ -343,6 +345,7 @@
 
                 logConsole(`Welcome back, ${user.displayName}! Session active.`);
             } else {
+                currentUser = null;
                 loginOverlay.style.display = 'flex';
                 userProfile.style.display = 'none';
             }
@@ -359,7 +362,7 @@
         });
 
         // ==========================================
-        // PAYMENT & UNLOCK LOGIC
+        // PAYMENT, DEPOSIT & UNLOCK LOGIC
         // ==========================================
         function submitVerification() {
             const sender = document.getElementById('pay-sender').value.trim();
@@ -374,13 +377,32 @@
             btn.innerText = 'VERIFYING...';
             btn.style.pointerEvents = 'none';
 
-            setTimeout(() => {
-                btn.innerText = 'VERIFICATION REQUEST SENT!';
-                btn.style.background = '#00C853';
-                btn.style.color = '#fff';
-                alert('Verification request sent successfully!\nPlease message us on WhatsApp with your TrxID to get your Daily Secret Code.');
-                document.getElementById('unlock-section-toggle').style.display = 'block';
-            }, 1500);
+            // SAVE DEPOSIT REQUEST TO FIREBASE FIRESTORE DATABASE DIRECTLY
+            let depositData = {
+                senderAccount: sender,
+                transactionId: trxid,
+                amount: "৳100",
+                userEmail: currentUser ? currentUser.email : "Anonymous",
+                userName: currentUser ? currentUser.displayName : "Guest",
+                userId: currentUser ? currentUser.uid : "Not Logged In",
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                status: "Pending"
+            };
+
+            db.collection("deposits").add(depositData)
+              .then(() => {
+                  btn.innerText = 'VERIFICATION REQUEST SENT!';
+                  btn.style.background = '#00C853';
+                  btn.style.color = '#fff';
+                  alert('Verification request sent & saved to database successfully!\nPlease message us on WhatsApp with your TrxID to get your Daily Secret Code.');
+                  document.getElementById('unlock-section-toggle').style.display = 'block';
+              })
+              .catch((error) => {
+                  console.error("Error adding deposit: ", error);
+                  alert("Failed to save deposit request. Check internet or Firebase rules.");
+                  btn.innerText = 'SUBMIT FOR VERIFICATION';
+                  btn.style.pointerEvents = 'auto';
+              });
         }
 
         let isPremiumUser = false;
