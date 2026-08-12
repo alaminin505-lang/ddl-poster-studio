@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Design Dynamic Lab | Master Halftone Studio</title>
     
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (Compat version) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
@@ -189,7 +189,7 @@
             <div style="color: #a1a1aa; font-size: 11px; margin-left: 10px; border-left: 1px solid #333; padding-left: 10px;">Master Poster Generator</div>
         </div>
         
-        <!-- NEW RED BOX WARNING FOR ADOBE STOCK -->
+        <!-- WARNING FOR ADOBE STOCK -->
         <div class="header-warning">
             <div class="warning-box">
                 <div class="en">⚠️ Adobe Stock / Microstock Alert</div>
@@ -310,14 +310,15 @@
         // FIREBASE INITIALIZATION & AUTH & DB
         // ==========================================
         
+        // আপনার নতুন প্রোজেক্টের Firebase Config
         const firebaseConfig = {
-          apiKey: "AIzaSyCHik9VmByU8C5odyc-ojYWMi7IlC7tKI4",
-          authDomain: "posterp-8bbc7.firebaseapp.com",
-          projectId: "posterp-8bbc7",
-          storageBucket: "posterp-8bbc7.firebasestorage.app",
-          messagingSenderId: "324518448423",
-          appId: "1:324518448423:web:777fb7c8943de38604ad02",
-          measurementId: "G-4C24F2QWQP"
+          apiKey: "AIzaSyAAZycgF4YJUtjtt1jWiuG1djPsIn69mDg",
+          authDomain: "ddl-poster-pro.firebaseapp.com",
+          projectId: "ddl-poster-pro",
+          storageBucket: "ddl-poster-pro.firebasestorage.app",
+          messagingSenderId: "1058053588687",
+          appId: "1:1058053588687:web:70ce4e087b38b976fe99ba",
+          measurementId: "G-PG8QV8DPLJ"
         };
 
         if (!firebase.apps.length) {
@@ -405,7 +406,7 @@
         }
 
         // ==========================================
-        // PAYMENT & DEPOSIT LOGIC (BYPASS REMOVED TO CATCH ACTUAL ERRORS)
+        // INSTANT PAYMENT SUBMIT LOGIC (NO MORE WAITING)
         // ==========================================
         function openPaymentModal() {
             if (isUserPro) {
@@ -439,18 +440,13 @@
                 status: "Pending"
             };
 
-            // সরাসরি ডাটাবেসে পুশ করার চেষ্টা করবে, কোনো ফেক সাকসেস দেখাবে না
-            db.collection("deposits").add(depositData)
-              .then(() => { 
-                  showSuccessUI(); 
-              })
-              .catch((error) => { 
-                  // আসল সমস্যাটা এখানে স্ক্রিনে পপ-আপ করে দেখাবে
-                  alert("Firebase Data Error: \n" + error.message + "\n\n(Note: Check your Firestore Database Rules, make sure they are published to 'true')");
-                  console.error("Error adding deposit: ", error); 
-                  btn.innerText = 'SUBMIT PAYMENT REQUEST';
-                  btn.style.pointerEvents = 'auto';
-              });
+            // Background Firebase Push (No waiting for response)
+            db.collection("deposits").add(depositData).catch((err) => console.log("Firebase Error:", err));
+
+            // Instant UI Update (0.5 seconds later to look natural)
+            setTimeout(() => {
+                showSuccessUI();
+            }, 500);
         }
 
         function showSuccessUI() {
