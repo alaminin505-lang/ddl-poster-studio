@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Design Dynamic Lab | Master Halftone Studio</title>
     
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (Compat version) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
@@ -292,14 +292,16 @@
         // ==========================================
         // FIREBASE INITIALIZATION & AUTH & DB
         // ==========================================
+        
+        // আপনার নতুন Firebase Config এখানে যুক্ত করা হয়েছে
         const firebaseConfig = {
-            apiKey: "AIzaSyA3rBFfYR4E1W7sjFVzEcjVgUQiNZTqgno",
-            authDomain: "poster-a5446.firebaseapp.com",
-            projectId: "poster-a5446",
-            storageBucket: "poster-a5446.firebasestorage.app",
-            messagingSenderId: "574561652944",
-            appId: "1:574561652944:web:fee36da6240fe38685ced5",
-            measurementId: "G-5BVZ7Q1B74"
+          apiKey: "AIzaSyCHik9VmByU8C5odyc-ojYWMi7IlC7tKI4",
+          authDomain: "posterp-8bbc7.firebaseapp.com",
+          projectId: "posterp-8bbc7",
+          storageBucket: "posterp-8bbc7.firebasestorage.app",
+          messagingSenderId: "324518448423",
+          appId: "1:324518448423:web:777fb7c8943de38604ad02",
+          measurementId: "G-4C24F2QWQP"
         };
 
         if (!firebase.apps.length) {
@@ -410,7 +412,6 @@
                 status: "Pending"
             };
 
-            // Fast fallback mechanism so button never gets stuck
             let isCompleted = false;
 
             setTimeout(() => {
@@ -431,7 +432,7 @@
                   console.error("Error adding deposit: ", error);
                   if(!isCompleted) {
                       isCompleted = true;
-                      showSuccessUI(); // Force success UI so user doesn't get stuck
+                      showSuccessUI();
                   }
               });
         }
