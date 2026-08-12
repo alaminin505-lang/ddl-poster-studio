@@ -96,8 +96,6 @@
         .btn-submit { background: var(--cyan-accent); color: #000; border: none; padding: 14px; width: 100%; font-weight: 900; font-size: 14px; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.2s; margin-bottom: 10px;}
         .btn-submit:hover { filter: brightness(1.1); }
 
-        #unlock-section-toggle { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #333;}
-
         .help-text { font-size: 12px; color: #888; text-align: center; margin-bottom: 15px; }
         .btn-whatsapp { background: transparent; border: 1px solid #00C853; color: #00C853; width: 100%; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; margin-bottom: 15px; }
         .btn-cancel { background: transparent; border: none; color: #888; text-decoration: underline; cursor: pointer; font-size: 13px; display: block; width: 100%; text-align: center; }
@@ -144,19 +142,19 @@
             <div class="premium-title">PREMIUM ACCESS</div>
             
             <div class="single-pkg-card">
-                <div class="badge">UNLIMITED ACCESS</div>
+                <div class="badge">LIFETIME PRO ACCESS</div>
                 <div class="pkg-price">৳100</div>
                 <div class="pkg-renders">Unlimited Renders & Downloads</div>
                 <div class="pkg-method">bKash / Nagad Accepted</div>
             </div>
 
-            <div class="payment-form">
+            <div class="payment-form" id="pay-form-container">
                 <div class="instruction">Send exactly <span class="instruction-amount">৳100</span> via bKash/Nagad to:</div>
                 <div class="bkash-num">01646348167 <span style="font-size:12px; color:#888; font-weight:normal;">(Personal)</span></div>
                 
                 <div class="input-group-row">
                     <div class="input-box" style="margin-bottom:10px;">
-                        <label class="input-label">YOUR NUMBER / EMAIL</label>
+                        <label class="input-label">YOUR NUMBER / SENDER ACC</label>
                         <input type="text" id="pay-sender" class="pay-input" placeholder="e.g. 017XXXXXXXX">
                     </div>
                     <div class="input-box">
@@ -165,18 +163,12 @@
                     </div>
                 </div>
                 
-                <button class="btn-submit" id="btn-submit-verification" onclick="submitVerification()">SUBMIT FOR VERIFICATION</button>
-                
-                <div id="unlock-section-toggle">
-                    <label class="input-label" style="text-align: center; color: var(--cyan-accent);">ENTER DAILY SECRET CODE</label>
-                    <input type="text" id="inp-secret-code" class="pay-input" style="text-align: center; margin-bottom: 15px; font-weight:bold; letter-spacing: 2px; font-size:16px;" placeholder="e.g. DDL1208">
-                    <button class="btn-submit" style="background: #00C853; color: #fff;" onclick="checkUnlockCode()">UNLOCK MASTERBOARD</button>
-                </div>
+                <button class="btn-submit" id="btn-submit-verification" onclick="submitVerification()">SUBMIT PAYMENT REQUEST</button>
             </div>
 
-            <div class="help-text">Need help? Message us with your TrxID on WhatsApp.</div>
-            <button class="btn-whatsapp" onclick="window.open('https://wa.me/8801646348167', '_blank')">Message on WhatsApp</button>
-            <button class="btn-cancel" onclick="document.getElementById('payment-modal').style.display='none'">Cancel & Return</button>
+            <div class="help-text" id="status-wait-text">After submitting, admin will verify and activate your account permanently!</div>
+            <button class="btn-whatsapp" onclick="window.open('https://wa.me/8801646348167', '_blank')">Message on WhatsApp for Fast Activation</button>
+            <button class="btn-cancel" onclick="document.getElementById('payment-modal').style.display='none'">Close & Return</button>
         </div>
     </div>
 
@@ -193,7 +185,7 @@
                 <img id="user-avatar" src="" alt="User">
                 <span id="user-name">Guest</span>
             </div>
-            <button class="btn" onclick="document.getElementById('payment-modal').style.display='flex'" style="background: var(--cyan-accent); color: #000;">⚡ UPGRADE TO PRO</button>
+            <button class="btn" id="btn-pro-status" onclick="openPaymentModal()" style="background: var(--cyan-accent); color: #000;">⚡ UPGRADE TO PRO</button>
             <button class="btn" id="btn-shuffle" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border-color);">⟳ Shuffle Styles</button>
         </div>
     </header>
@@ -279,7 +271,7 @@
 
             <div class="panel-section" style="background: rgba(0, 229, 255, 0.05);">
                 <div class="section-title" style="color: var(--cyan-accent);">📥 মাস্টার ডাউনলোড (DOWNLOAD)</div>
-                <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 12px; line-height:1.4;">Premium access required. Downloads the entire 4-in-1 Master Artboard as a single SVG file.</div>
+                <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 12px; line-height:1.4;">Downloads the entire 4-in-1 Master Artboard as a single SVG file.</div>
                 
                 <button class="btn download-btn" id="btn-download-master" onclick="handleMasterDownload()">🔒 Download 4-in-1 Masterboard</button>
             </div>
@@ -324,8 +316,9 @@
         const userName = document.getElementById('user-name');
 
         let currentUser = null;
+        let isUserPro = false;
 
-        // Track Auth State & Save User to Firestore Database automatically
+        // Track Auth State & Check Pro Status from Firestore Database in Real-time
         auth.onAuthStateChanged((user) => {
             if (user) {
                 currentUser = user;
@@ -334,16 +327,26 @@
                 userName.innerText = user.displayName ? user.displayName.split(' ')[0] : 'User';
                 userAvatar.src = user.photoURL || 'https://ui-avatars.com/api/?name=User&background=00E5FF&color=000';
 
-                // Save user info to Firestore database
-                db.collection("users").doc(user.uid).set({
-                    uid: user.uid,
-                    name: user.displayName,
-                    email: user.email,
-                    photo: user.photoURL,
-                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true }).catch((err) => console.log(err));
+                // Real-time listener for user profile to check if isPaid is true
+                db.collection("users").doc(user.uid).onSnapshot((doc) => {
+                    let userData = doc.data();
+                    if (userData && userData.isPaid === true) {
+                        isUserPro = true;
+                        applyProUI();
+                    } else {
+                        // Ensure user doc exists with default isPaid: false
+                        db.collection("users").doc(user.uid).set({
+                            uid: user.uid,
+                            name: user.displayName,
+                            email: user.email,
+                            photo: user.photoURL,
+                            isPaid: false,
+                            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true }).catch((err) => console.log(err));
+                    }
+                });
 
-                logConsole(`Welcome back, ${user.displayName}! Session active.`);
+                logConsole(`Welcome back, ${user.displayName}!`);
             } else {
                 currentUser = null;
                 loginOverlay.style.display = 'flex';
@@ -361,23 +364,43 @@
             });
         });
 
+        function applyProUI() {
+            const btnMaster = document.getElementById('btn-download-master');
+            btnMaster.classList.add('unlocked');
+            btnMaster.innerHTML = '↓ Download 4-in-1 Masterboard';
+
+            const btnProStatus = document.getElementById('btn-pro-status');
+            btnProStatus.innerText = '✨ PRO ACTIVE (LIFETIME)';
+            btnProStatus.style.background = '#00C853';
+            btnProStatus.style.color = '#fff';
+            
+            logConsole("Lifetime Pro Status Active! Enjoy unlimited downloads.");
+        }
+
         // ==========================================
-        // PAYMENT, DEPOSIT & UNLOCK LOGIC
+        // PAYMENT & DEPOSIT LOGIC
         // ==========================================
+        function openPaymentModal() {
+            if (isUserPro) {
+                alert("Your account is already PRO (Lifetime Active)! You don't need to pay again.");
+                return;
+            }
+            document.getElementById('payment-modal').style.display = 'flex';
+        }
+
         function submitVerification() {
             const sender = document.getElementById('pay-sender').value.trim();
             const trxid = document.getElementById('pay-trxid').value.trim();
             const btn = document.getElementById('btn-submit-verification');
 
             if(sender === '' || trxid === '') {
-                alert('Please enter both your Number/Email and Transaction ID.');
+                alert('Please enter both your bKash/Nagad Number and Transaction ID.');
                 return;
             }
 
-            btn.innerText = 'VERIFYING...';
+            btn.innerText = 'SENDING REQUEST...';
             btn.style.pointerEvents = 'none';
 
-            // SAVE DEPOSIT REQUEST TO FIREBASE FIRESTORE DATABASE DIRECTLY
             let depositData = {
                 senderAccount: sender,
                 transactionId: trxid,
@@ -391,52 +414,25 @@
 
             db.collection("deposits").add(depositData)
               .then(() => {
-                  btn.innerText = 'VERIFICATION REQUEST SENT!';
+                  btn.innerText = 'REQUEST SUBMITTED SUCCESSFULLY!';
                   btn.style.background = '#00C853';
                   btn.style.color = '#fff';
-                  alert('Verification request sent & saved to database successfully!\nPlease message us on WhatsApp with your TrxID to get your Daily Secret Code.');
-                  document.getElementById('unlock-section-toggle').style.display = 'block';
+                  document.getElementById('pay-form-container').innerHTML = `
+                      <div style="color: #00C853; font-weight: bold; font-size: 15px; margin-bottom: 10px;">Request Received!</div>
+                      <div style="color: #fff; font-size: 13px; line-height: 1.5;">Admin will check your TrxID and activate your account permanently within a few minutes. Once active, you can download anytime without any code!</div>
+                  `;
               })
               .catch((error) => {
                   console.error("Error adding deposit: ", error);
-                  alert("Failed to save deposit request. Check internet or Firebase rules.");
-                  btn.innerText = 'SUBMIT FOR VERIFICATION';
+                  alert("Failed to submit. Please check your internet connection.");
+                  btn.innerText = 'SUBMIT PAYMENT REQUEST';
                   btn.style.pointerEvents = 'auto';
               });
         }
 
-        let isPremiumUser = false;
-
-        function checkUnlockCode() {
-            const codeInput = document.getElementById('inp-secret-code').value.toUpperCase().trim();
-            
-            const today = new Date();
-            let day = today.getDate();
-            let month = today.getMonth() + 1; 
-            
-            day = day < 10 ? '0' + day : day;
-            month = month < 10 ? '0' + month : month;
-            
-            const SECRET_PASSCODE = "DDL" + day + month; 
-
-            if (codeInput === SECRET_PASSCODE) {
-                isPremiumUser = true;
-                document.getElementById('payment-modal').style.display = 'none';
-                
-                const btnMaster = document.getElementById('btn-download-master');
-                btnMaster.classList.add('unlocked');
-                btnMaster.innerHTML = '↓ Download 4-in-1 Masterboard';
-                
-                logConsole("Premium Access Granted! Valid for today only.");
-                alert("Success! The master download button is now unlocked for today.");
-            } else {
-                alert("Invalid or Expired Code! Please make sure you have today's code.");
-            }
-        }
-
         function handleMasterDownload() {
-            if (!isPremiumUser) {
-                document.getElementById('payment-modal').style.display = 'flex';
+            if (!isUserPro) {
+                openPaymentModal();
                 return;
             }
             executeMasterDownload();
