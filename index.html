@@ -293,7 +293,6 @@
         // FIREBASE INITIALIZATION & AUTH & DB
         // ==========================================
         
-        // আপনার নতুন Firebase Config এখানে যুক্ত করা হয়েছে
         const firebaseConfig = {
           apiKey: "AIzaSyCHik9VmByU8C5odyc-ojYWMi7IlC7tKI4",
           authDomain: "posterp-8bbc7.firebaseapp.com",
@@ -320,7 +319,7 @@
         let currentUser = null;
         let isUserPro = false;
 
-        // Track Auth State & Check Pro Status from Firestore Database in Real-time
+        // FIXED AUTH LOGIC: No more infinite loops!
         auth.onAuthStateChanged((user) => {
             if (user) {
                 currentUser = user;
@@ -329,20 +328,34 @@
                 userName.innerText = user.displayName ? user.displayName.split(' ')[0] : 'User';
                 userAvatar.src = user.photoURL || 'https://ui-avatars.com/api/?name=User&background=00E5FF&color=000';
 
-                db.collection("users").doc(user.uid).onSnapshot((doc) => {
-                    let userData = doc.data();
-                    if (userData && userData.isPaid === true) {
-                        isUserPro = true;
-                        applyProUI();
-                    } else {
-                        db.collection("users").doc(user.uid).set({
+                const userRef = db.collection("users").doc(user.uid);
+                
+                // শুধুমাত্র প্রথমবার অ্যাকাউন্টের ডাটা সেভ করবে
+                userRef.get().then((doc) => {
+                    if (!doc.exists) {
+                        userRef.set({
                             uid: user.uid,
                             name: user.displayName,
                             email: user.email,
                             photo: user.photoURL,
                             isPaid: false,
                             lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-                        }, { merge: true }).catch((err) => console.log(err));
+                        });
+                    } else {
+                        userRef.update({
+                            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                });
+
+                // ফায়ারবেস থেকে শুধু চেঞ্জগুলো রিড করবে (আপডেট করবে না)
+                userRef.onSnapshot((doc) => {
+                    if (doc.exists) {
+                        let userData = doc.data();
+                        if (userData.isPaid === true) {
+                            isUserPro = true;
+                            applyProUI();
+                        }
                     }
                 });
 
@@ -378,7 +391,7 @@
         }
 
         // ==========================================
-        // PAYMENT & DEPOSIT LOGIC (WITH INSTANT BYPASS)
+        // PAYMENT & DEPOSIT LOGIC
         // ==========================================
         function openPaymentModal() {
             if (isUserPro) {
@@ -413,28 +426,13 @@
             };
 
             let isCompleted = false;
-
             setTimeout(() => {
-                if(!isCompleted) {
-                    isCompleted = true;
-                    showSuccessUI();
-                }
-            }, 3000); // Max 3 seconds wait
+                if(!isCompleted) { isCompleted = true; showSuccessUI(); }
+            }, 3000);
 
             db.collection("deposits").add(depositData)
-              .then(() => {
-                  if(!isCompleted) {
-                      isCompleted = true;
-                      showSuccessUI();
-                  }
-              })
-              .catch((error) => {
-                  console.error("Error adding deposit: ", error);
-                  if(!isCompleted) {
-                      isCompleted = true;
-                      showSuccessUI();
-                  }
-              });
+              .then(() => { if(!isCompleted) { isCompleted = true; showSuccessUI(); } })
+              .catch((error) => { console.error("Error adding deposit: ", error); if(!isCompleted) { isCompleted = true; showSuccessUI(); } });
         }
 
         function showSuccessUI() {
@@ -449,10 +447,7 @@
         }
 
         function handleMasterDownload() {
-            if (!isUserPro) {
-                openPaymentModal();
-                return;
-            }
+            if (!isUserPro) { openPaymentModal(); return; }
             executeMasterDownload();
         }
 
@@ -541,9 +536,7 @@
             }
         }
 
-        document.querySelectorAll('.panel-input').forEach(input => {
-            input.addEventListener('input', applyCustomizations);
-        });
+        document.querySelectorAll('.panel-input').forEach(input => { input.addEventListener('input', applyCustomizations); });
 
         const mapRange = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
         function getRnd(min, max, seed) { let x = Math.sin(seed) * 10000; return (x - Math.floor(x)) * (max - min) + min; }
