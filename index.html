@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Design Dynamic Lab | Master Halftone Studio</title>
     
-    <!-- Firebase SDKs (Compat version) -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
@@ -21,7 +21,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
         body { background-color: var(--bg-main); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; overflow: hidden; font-size: 13px; }
 
-        /* Login Overlay Styles */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 9, 11, 0.98); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
         .login-box { background: #18181b; padding: 40px; border-radius: 12px; border: 1px solid var(--cyan-accent); text-align: center; max-width: 400px; width: 90%; box-shadow: 0 0 40px rgba(0, 229, 255, 0.15); }
         .login-logo { width: 50px; height: 50px; background: repeating-linear-gradient(45deg, var(--cyan-accent), var(--cyan-accent) 4px, transparent 4px, transparent 8px); border-radius: 8px; margin: 0 auto 20px; border: 2px solid var(--cyan-accent); }
@@ -50,7 +49,6 @@
         .header-left, .header-right { display: flex; align-items: center; gap: 12px; flex: 1; }
         .header-right { justify-content: flex-end; }
         
-        /* ADOBE STOCK WARNING BOX */
         .header-warning { flex: 1; display: flex; justify-content: center; }
         .warning-box { border: 1px solid var(--accent-main); padding: 6px 15px; border-radius: 4px; text-align: center; background: rgba(255, 51, 102, 0.05); }
         .warning-box .en { color: var(--accent-main); font-size: 11px; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; }
@@ -124,13 +122,11 @@
 </head>
 <body>
 
-    <!-- Google Login Overlay -->
     <div id="login-overlay">
         <div class="login-box">
             <div class="login-logo"></div>
             <div class="login-title">Design Dynamic Lab</div>
             <div class="login-desc">Sign in with your Google account to access and track your studio session securely.</div>
-            
             <button class="google-btn" id="btn-google-login">
                 <svg class="google-icon" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -140,26 +136,22 @@
                 </svg>
                 Sign in with Google
             </button>
-            <div id="login-error" style="color: #FF3366; font-size: 11px; margin-top: 15px; font-weight: bold; display: none;">Login failed. Please enable Google Auth in Firebase console.</div>
+            <div id="login-error" style="color: #FF3366; font-size: 11px; margin-top: 15px; font-weight: bold; display: none;">Login failed. Please enable Google Auth.</div>
         </div>
     </div>
 
-    <!-- Payment & Unlock Modal -->
     <div id="payment-modal">
         <div class="premium-box">
             <div class="premium-title">PREMIUM ACCESS</div>
-            
             <div class="single-pkg-card">
                 <div class="badge">LIFETIME PRO ACCESS</div>
                 <div class="pkg-price">৳100</div>
                 <div class="pkg-renders">Unlimited Renders & Downloads</div>
                 <div class="pkg-method">bKash / Nagad Accepted</div>
             </div>
-
             <div class="payment-form" id="pay-form-container">
                 <div class="instruction">Send exactly <span class="instruction-amount">৳100</span> via bKash/Nagad to:</div>
                 <div class="bkash-num">01646348167 <span style="font-size:12px; color:#888; font-weight:normal;">(Personal)</span></div>
-                
                 <div class="input-group-row">
                     <div class="input-box" style="margin-bottom:10px;">
                         <label class="input-label">YOUR NUMBER / SENDER ACC</label>
@@ -170,10 +162,8 @@
                         <input type="text" id="pay-trxid" class="pay-input" placeholder="e.g. 9B5XQ7YZ">
                     </div>
                 </div>
-                
                 <button class="btn-submit" id="btn-submit-verification" onclick="submitVerification()">SUBMIT PAYMENT REQUEST</button>
             </div>
-
             <div class="help-text" id="status-wait-text">After submitting, admin will verify and activate your account permanently!</div>
             <button class="btn-whatsapp" onclick="window.open('https://wa.me/8801646348167', '_blank')">Message on WhatsApp for Fast Activation</button>
             <button class="btn-cancel" onclick="document.getElementById('payment-modal').style.display='none'">Close & Return</button>
@@ -182,25 +172,18 @@
 
     <header class="header">
         <div class="header-left">
-            <div class="logo">
-                <div class="logo-icon"></div>
-                DESIGN DYNAMIC LAB
-            </div>
+            <div class="logo"><div class="logo-icon"></div>DESIGN DYNAMIC LAB</div>
             <div style="color: #a1a1aa; font-size: 11px; margin-left: 10px; border-left: 1px solid #333; padding-left: 10px;">Master Poster Generator</div>
         </div>
-        
-        <!-- WARNING FOR ADOBE STOCK -->
         <div class="header-warning">
             <div class="warning-box">
                 <div class="en">⚠️ Adobe Stock / Microstock Alert</div>
                 <div class="bn">To avoid 'Similar Issue', customize the designs before uploading! / 'Similar Issue' এড়াতে প্যানেল থেকে ডিজাইন কাস্টমাইজ করে নিন!</div>
             </div>
         </div>
-
         <div class="header-right">
             <div class="user-profile" id="user-profile" style="display: none;">
-                <img id="user-avatar" src="" alt="User">
-                <span id="user-name">Guest</span>
+                <img id="user-avatar" src="" alt="User"><span id="user-name">Guest</span>
             </div>
             <button class="btn" id="btn-pro-status" onclick="openPaymentModal()" style="background: var(--cyan-accent); color: #000;">⚡ UPGRADE TO PRO</button>
             <button class="btn" id="btn-shuffle" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border-color);">⟳ Shuffle Styles</button>
@@ -209,95 +192,26 @@
 
     <div class="workspace">
         <aside class="sidebar sidebar-left">
-            
             <div class="panel-section">
                 <div class="section-title">🎨 কাস্টমাইজেশন (CUSTOMIZE PANELS)</div>
-                
-                <details open>
-                    <summary>Poster 1 (Far Left)</summary>
-                    <div class="details-content">
-                        <div class="control-group">
-                            <div class="control-label">Title / টাইটেল</div>
-                            <input type="text" id="inp-title-0" maxlength="15" class="panel-input" data-index="0">
-                        </div>
-                        <div class="color-picker-row">Background <input type="color" id="inp-bg-0" class="panel-input" data-index="0"></div>
-                        <div class="color-picker-row">Line & Shape <input type="color" id="inp-line-0" class="panel-input" data-index="0"></div>
-                        <div class="color-picker-row">Typo Box <input type="color" id="inp-typo-0" class="panel-input" data-index="0"></div>
-                        <div class="color-picker-row">Main Text <input type="color" id="inp-text-0" class="panel-input" data-index="0"></div>
-                    </div>
-                </details>
-
-                <details>
-                    <summary>Poster 2 (Center Left)</summary>
-                    <div class="details-content">
-                        <div class="control-group">
-                            <div class="control-label">Title / টাইটেল</div>
-                            <input type="text" id="inp-title-1" maxlength="15" class="panel-input" data-index="1">
-                        </div>
-                        <div class="color-picker-row">Background <input type="color" id="inp-bg-1" class="panel-input" data-index="1"></div>
-                        <div class="color-picker-row">Line & Shape <input type="color" id="inp-line-1" class="panel-input" data-index="1"></div>
-                        <div class="color-picker-row">Typo Box <input type="color" id="inp-typo-1" class="panel-input" data-index="1"></div>
-                        <div class="color-picker-row">Main Text <input type="color" id="inp-text-1" class="panel-input" data-index="1"></div>
-                    </div>
-                </details>
-
-                <details>
-                    <summary>Poster 3 (Center Right)</summary>
-                    <div class="details-content">
-                        <div class="control-group">
-                            <div class="control-label">Title / টাইটেল</div>
-                            <input type="text" id="inp-title-2" maxlength="15" class="panel-input" data-index="2">
-                        </div>
-                        <div class="color-picker-row">Background <input type="color" id="inp-bg-2" class="panel-input" data-index="2"></div>
-                        <div class="color-picker-row">Line & Shape <input type="color" id="inp-line-2" class="panel-input" data-index="2"></div>
-                        <div class="color-picker-row">Typo Box <input type="color" id="inp-typo-2" class="panel-input" data-index="2"></div>
-                        <div class="color-picker-row">Main Text <input type="color" id="inp-text-2" class="panel-input" data-index="2"></div>
-                    </div>
-                </details>
-
-                <details>
-                    <summary>Poster 4 (Far Right)</summary>
-                    <div class="details-content">
-                        <div class="control-group">
-                            <div class="control-label">Title / টাইটেল</div>
-                            <input type="text" id="inp-title-3" maxlength="15" class="panel-input" data-index="3">
-                        </div>
-                        <div class="color-picker-row">Background <input type="color" id="inp-bg-3" class="panel-input" data-index="3"></div>
-                        <div class="color-picker-row">Line & Shape <input type="color" id="inp-line-3" class="panel-input" data-index="3"></div>
-                        <div class="color-picker-row">Typo Box <input type="color" id="inp-typo-3" class="panel-input" data-index="3"></div>
-                        <div class="color-picker-row">Main Text <input type="color" id="inp-text-3" class="panel-input" data-index="3"></div>
-                    </div>
-                </details>
+                <details open><summary>Poster 1 (Far Left)</summary><div class="details-content"><div class="control-group"><div class="control-label">Title / টাইটেল</div><input type="text" id="inp-title-0" maxlength="15" class="panel-input" data-index="0"></div><div class="color-picker-row">Background <input type="color" id="inp-bg-0" class="panel-input" data-index="0"></div><div class="color-picker-row">Line & Shape <input type="color" id="inp-line-0" class="panel-input" data-index="0"></div><div class="color-picker-row">Typo Box <input type="color" id="inp-typo-0" class="panel-input" data-index="0"></div><div class="color-picker-row">Main Text <input type="color" id="inp-text-0" class="panel-input" data-index="0"></div></div></details>
+                <details><summary>Poster 2 (Center Left)</summary><div class="details-content"><div class="control-group"><div class="control-label">Title / টাইটেল</div><input type="text" id="inp-title-1" maxlength="15" class="panel-input" data-index="1"></div><div class="color-picker-row">Background <input type="color" id="inp-bg-1" class="panel-input" data-index="1"></div><div class="color-picker-row">Line & Shape <input type="color" id="inp-line-1" class="panel-input" data-index="1"></div><div class="color-picker-row">Typo Box <input type="color" id="inp-typo-1" class="panel-input" data-index="1"></div><div class="color-picker-row">Main Text <input type="color" id="inp-text-1" class="panel-input" data-index="1"></div></div></details>
+                <details><summary>Poster 3 (Center Right)</summary><div class="details-content"><div class="control-group"><div class="control-label">Title / টাইটেল</div><input type="text" id="inp-title-2" maxlength="15" class="panel-input" data-index="2"></div><div class="color-picker-row">Background <input type="color" id="inp-bg-2" class="panel-input" data-index="2"></div><div class="color-picker-row">Line & Shape <input type="color" id="inp-line-2" class="panel-input" data-index="2"></div><div class="color-picker-row">Typo Box <input type="color" id="inp-typo-2" class="panel-input" data-index="2"></div><div class="color-picker-row">Main Text <input type="color" id="inp-text-2" class="panel-input" data-index="2"></div></div></details>
+                <details><summary>Poster 4 (Far Right)</summary><div class="details-content"><div class="control-group"><div class="control-label">Title / টাইটেল</div><input type="text" id="inp-title-3" maxlength="15" class="panel-input" data-index="3"></div><div class="color-picker-row">Background <input type="color" id="inp-bg-3" class="panel-input" data-index="3"></div><div class="color-picker-row">Line & Shape <input type="color" id="inp-line-3" class="panel-input" data-index="3"></div><div class="color-picker-row">Typo Box <input type="color" id="inp-typo-3" class="panel-input" data-index="3"></div><div class="color-picker-row">Main Text <input type="color" id="inp-text-3" class="panel-input" data-index="3"></div></div></details>
             </div>
-
             <div class="panel-section">
                 <div class="section-title">⚙️ ইঞ্জিন সেটিংস (ENGINE SETTINGS)</div>
-                <div class="control-group">
-                    <div class="control-label"><span>Base Density / ঘনত্ব</span><span id="val-density">80</span></div>
-                    <input type="range" id="inp-density" min="30" max="200" value="80">
-                </div>
-                <div class="control-group">
-                    <div class="control-label"><span>Wave Frequency / ওয়েভ</span><span id="val-freq">40%</span></div>
-                    <input type="range" id="inp-freq" min="10" max="100" value="40">
-                </div>
-                <div class="control-group">
-                    <div class="control-label"><span>Base Thickness / পুরুত্ব</span><span id="val-thick">25px</span></div>
-                    <input type="range" id="inp-thick" min="5" max="80" value="25">
-                </div>
+                <div class="control-group"><div class="control-label"><span>Base Density / ঘনত্ব</span><span id="val-density">80</span></div><input type="range" id="inp-density" min="30" max="200" value="80"></div>
+                <div class="control-group"><div class="control-label"><span>Wave Frequency / ওয়েভ</span><span id="val-freq">40%</span></div><input type="range" id="inp-freq" min="10" max="100" value="40"></div>
+                <div class="control-group"><div class="control-label"><span>Base Thickness / পুরুত্ব</span><span id="val-thick">25px</span></div><input type="range" id="inp-thick" min="5" max="80" value="25"></div>
             </div>
-
             <div class="panel-section" style="background: rgba(0, 229, 255, 0.05);">
                 <div class="section-title" style="color: var(--cyan-accent);">📥 মাস্টার ডাউনলোড (DOWNLOAD)</div>
                 <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 12px; line-height:1.4;">Downloads the entire 4-in-1 Master Artboard as a single SVG file.</div>
-                
                 <button class="btn download-btn" id="btn-download-master" onclick="handleMasterDownload()">🔒 Download 4-in-1 Masterboard</button>
             </div>
-
         </aside>
-
-        <main class="main-canvas-area">
-            <div id="svg-container"></div>
-        </main>
+        <main class="main-canvas-area"><div id="svg-container"></div></main>
     </div>
 
     <footer class="console">
@@ -305,438 +219,9 @@
         <span id="dimension-msg" style="color: var(--text-muted);">Master Artboard: 7320 x 2520 px</span>
     </footer>
 
+    <!-- PROTECTED & OBFUSCATED JAVASCRIPT ENGINE -->
     <script>
-        // ==========================================
-        // FIREBASE INITIALIZATION & AUTH & DB
-        // ==========================================
-        
-        // আপনার নতুন প্রোজেক্টের Firebase Config
-        const firebaseConfig = {
-          apiKey: "AIzaSyAAZycgF4YJUtjtt1jWiuG1djPsIn69mDg",
-          authDomain: "ddl-poster-pro.firebaseapp.com",
-          projectId: "ddl-poster-pro",
-          storageBucket: "ddl-poster-pro.firebasestorage.app",
-          messagingSenderId: "1058053588687",
-          appId: "1:1058053588687:web:70ce4e087b38b976fe99ba",
-          measurementId: "G-PG8QV8DPLJ"
-        };
-
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        const loginOverlay = document.getElementById('login-overlay');
-        const btnGoogleLogin = document.getElementById('btn-google-login');
-        const loginError = document.getElementById('login-error');
-        const userProfile = document.getElementById('user-profile');
-        const userAvatar = document.getElementById('user-avatar');
-        const userName = document.getElementById('user-name');
-
-        let currentUser = null;
-        let isUserPro = false;
-
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                currentUser = user;
-                loginOverlay.style.display = 'none';
-                userProfile.style.display = 'flex';
-                userName.innerText = user.displayName ? user.displayName.split(' ')[0] : 'User';
-                userAvatar.src = user.photoURL || 'https://ui-avatars.com/api/?name=User&background=00E5FF&color=000';
-
-                const userRef = db.collection("users").doc(user.uid);
-                
-                userRef.get().then((doc) => {
-                    if (!doc.exists) {
-                        userRef.set({
-                            uid: user.uid,
-                            name: user.displayName,
-                            email: user.email,
-                            photo: user.photoURL,
-                            isPaid: false,
-                            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    } else {
-                        userRef.update({
-                            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    }
-                });
-
-                userRef.onSnapshot((doc) => {
-                    if (doc.exists) {
-                        let userData = doc.data();
-                        if (userData.isPaid === true) {
-                            isUserPro = true;
-                            applyProUI();
-                        }
-                    }
-                });
-
-                logConsole(`Welcome back, ${user.displayName}!`);
-            } else {
-                currentUser = null;
-                loginOverlay.style.display = 'flex';
-                userProfile.style.display = 'none';
-            }
-        });
-
-        btnGoogleLogin.addEventListener('click', () => {
-            btnGoogleLogin.innerHTML = 'Connecting...';
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch((error) => {
-                console.error("Login Error: ", error);
-                loginError.style.display = 'block';
-                btnGoogleLogin.innerHTML = 'Sign in with Google';
-            });
-        });
-
-        function applyProUI() {
-            const btnMaster = document.getElementById('btn-download-master');
-            btnMaster.classList.add('unlocked');
-            btnMaster.innerHTML = '↓ Download 4-in-1 Masterboard';
-
-            const btnProStatus = document.getElementById('btn-pro-status');
-            btnProStatus.innerText = '✨ PRO ACTIVE (LIFETIME)';
-            btnProStatus.style.background = '#00C853';
-            btnProStatus.style.color = '#fff';
-            
-            logConsole("Lifetime Pro Status Active! Enjoy unlimited downloads.");
-        }
-
-        // ==========================================
-        // INSTANT PAYMENT SUBMIT LOGIC (NO MORE WAITING)
-        // ==========================================
-        function openPaymentModal() {
-            if (isUserPro) {
-                alert("Your account is already PRO (Lifetime Active)! You don't need to pay again.");
-                return;
-            }
-            document.getElementById('payment-modal').style.display = 'flex';
-        }
-
-        function submitVerification() {
-            const sender = document.getElementById('pay-sender').value.trim();
-            const trxid = document.getElementById('pay-trxid').value.trim();
-            const btn = document.getElementById('btn-submit-verification');
-
-            if(sender === '' || trxid === '') {
-                alert('Please enter both your bKash/Nagad Number and Transaction ID.');
-                return;
-            }
-
-            btn.innerText = 'SENDING REQUEST...';
-            btn.style.pointerEvents = 'none';
-
-            let depositData = {
-                senderAccount: sender,
-                transactionId: trxid,
-                amount: "৳100",
-                userEmail: currentUser ? currentUser.email : "Anonymous",
-                userName: currentUser ? currentUser.displayName : "Guest",
-                userId: currentUser ? currentUser.uid : "Not Logged In",
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                status: "Pending"
-            };
-
-            // Background Firebase Push (No waiting for response)
-            db.collection("deposits").add(depositData).catch((err) => console.log("Firebase Error:", err));
-
-            // Instant UI Update (0.5 seconds later to look natural)
-            setTimeout(() => {
-                showSuccessUI();
-            }, 500);
-        }
-
-        function showSuccessUI() {
-            const btn = document.getElementById('btn-submit-verification');
-            btn.innerText = 'REQUEST SUBMITTED SUCCESSFULLY!';
-            btn.style.background = '#00C853';
-            btn.style.color = '#fff';
-            document.getElementById('pay-form-container').innerHTML = `
-                <div style="color: #00C853; font-weight: bold; font-size: 15px; margin-bottom: 10px;">Request Received!</div>
-                <div style="color: #fff; font-size: 13px; line-height: 1.5;">Admin will check your TrxID and activate your account permanently within a few minutes. Once active, you can download anytime without any code!</div>
-            `;
-        }
-
-        function handleMasterDownload() {
-            if (!isUserPro) { openPaymentModal(); return; }
-            executeMasterDownload();
-        }
-
-        // ==========================================
-        // ENGINE & GENERATOR LOGIC (GENERIC TEXT UPDATE)
-        // ==========================================
-        const svgContainer = document.getElementById('svg-container');
-        const consoleMsg = document.getElementById('console-msg');
-        let globalSeed = Math.random() * 100000;
-        
-        const w = 1800; const h = 2520; const gap = 40;
-
-        const inputs = {
-            density: document.getElementById('inp-density'),
-            freq: document.getElementById('inp-freq'),
-            thick: document.getElementById('inp-thick')
-        };
-        const vals = {
-            density: document.getElementById('val-density'),
-            freq: document.getElementById('val-freq'),
-            thick: document.getElementById('val-thick')
-        };
-
-        const patternTypes = ['chevron', 'wavy', 'vertical', 'concentric', 'mesh', 'glitch', 'diagonal', 'magnetic', 'dashed_circle', 'arched'];
-        const colorPalettes = [
-            { bg: '#E4E3DF', line: '#1C212E', typo: '#E4E3DF', text: '#1C212E' },
-            { bg: '#1C212E', line: '#E4E3DF', typo: '#E4E3DF', text: '#1C212E' },
-            { bg: '#E3242B', line: '#0B1021', typo: '#E3242B', text: '#FFFFFF' },
-            { bg: '#FFD700', line: '#111111', typo: '#FFD700', text: '#111111' },
-            { bg: '#4A1D23', line: '#F4F1EA', typo: '#4A1D23', text: '#FFFFFF' },
-            { bg: '#1434A4', line: '#0B1021', typo: '#1434A4', text: '#F0E6D2' },
-            { bg: '#CBA135', line: '#2A2A2A', typo: '#CBA135', text: '#FFFFFF' },
-            { bg: '#FFB6C1', line: '#E3242B', typo: '#FFB6C1', text: '#FFFFFF' },
-            { bg: '#BFFF00', line: '#1C212E', typo: '#BFFF00', text: '#1C212E' },
-            { bg: '#F0E6D2', line: '#1A2436', typo: '#F0E6D2', text: '#8CB83C' }
-        ];
-        
-        // Updated to generic text for Adobe Stock
-        const titles = ['LOREM', 'IPSUM', 'DOLOR', 'POSTER', 'VECTOR', 'MODERN', 'STUDIO', 'ABSTRACT', 'VORTEX', 'MINIMAL'];
-
-        let activePanels = [];
-
-        function shuffleArray(arr) {
-            let array = [...arr];
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
-
-        function randomizePanels() {
-            activePanels = [];
-            let shuffledTypes = shuffleArray(patternTypes);
-            let shuffledPalettes = shuffleArray(colorPalettes);
-            let shuffledTitles = shuffleArray(titles);
-
-            for(let i = 0; i < 4; i++) {
-                activePanels.push({
-                    type: shuffledTypes[i],
-                    palette: JSON.parse(JSON.stringify(shuffledPalettes[i])),
-                    title: shuffledTitles[i],
-                    id: Math.floor(Math.random() * 90) + 10
-                });
-            }
-            syncAllCustomizeUIs();
-        }
-
-        function syncAllCustomizeUIs() {
-            for(let i = 0; i < 4; i++) {
-                document.getElementById(`inp-title-${i}`).value = activePanels[i].title;
-                document.getElementById(`inp-bg-${i}`).value = activePanels[i].palette.bg;
-                document.getElementById(`inp-line-${i}`).value = activePanels[i].palette.line;
-                document.getElementById(`inp-typo-${i}`).value = activePanels[i].palette.typo;
-                document.getElementById(`inp-text-${i}`).value = activePanels[i].palette.text;
-            }
-        }
-
-        function applyCustomizations(event) {
-            let index = event.target.getAttribute('data-index');
-            if(index !== null) {
-                activePanels[index].title = document.getElementById(`inp-title-${index}`).value || 'POSTER';
-                activePanels[index].palette.bg = document.getElementById(`inp-bg-${index}`).value;
-                activePanels[index].palette.line = document.getElementById(`inp-line-${index}`).value;
-                activePanels[index].palette.typo = document.getElementById(`inp-typo-${index}`).value;
-                activePanels[index].palette.text = document.getElementById(`inp-text-${index}`).value;
-                updateView();
-            }
-        }
-
-        document.querySelectorAll('.panel-input').forEach(input => { input.addEventListener('input', applyCustomizations); });
-
-        const mapRange = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
-        function getRnd(min, max, seed) { let x = Math.sin(seed) * 10000; return (x - Math.floor(x)) * (max - min) + min; }
-
-        function getPosterElements(panel, index, globalDensity, globalFreq, globalThick) {
-            let pattern = ''; 
-            let pSeed = globalSeed * (index + 1.23);
-            let p = panel.palette;
-            
-            let d = Math.floor(globalDensity * getRnd(0.5, 1.6, pSeed)); 
-            let mThick = globalThick * getRnd(0.4, 2.0, pSeed+1); 
-            let lFreq = globalFreq * getRnd(0.5, 1.8, pSeed+2); 
-            
-            let linesAmt = Math.floor(d * 1.5); 
-            let phaseShift = getRnd(0, Math.PI, pSeed);
-
-            if (panel.type === 'chevron') {
-                for (let i = 0; i <= linesAmt; i++) {
-                    let yPos = mapRange(i, 0, linesAmt, -h*0.2, h*1.2);
-                    let sw = (Math.sin((i * 0.1 * lFreq) + phaseShift) + 1) * (mThick / 2) + 0.5;
-                    pattern += `<path d="M 0,${yPos} L ${w*0.5},${yPos + h*0.15} L ${w},${yPos}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}" stroke-linejoin="miter"/>\n`;
-                }
-            } else if (panel.type === 'wavy') {
-                for (let i = 0; i <= linesAmt; i++) {
-                    let yPos = mapRange(i, 0, linesAmt, -h*0.2, h*1.2);
-                    let sw = (Math.sin((i * 0.12 * lFreq) + phaseShift) + 1) * (mThick / 2) + 0.5;
-                    let curve = Math.cos((i * 0.08 * lFreq) + phaseShift) * (h * 0.3);
-                    pattern += `<path d="M 0,${yPos} Q ${w*0.5},${yPos + curve} ${w},${yPos}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}"/>\n`;
-                }
-            } else if (panel.type === 'vertical') {
-                for (let i = 0; i <= d * 2; i++) {
-                    let xPos = mapRange(i, 0, d * 2, 0, w);
-                    let sw = (Math.sin((i * 0.1 * lFreq) + phaseShift) + 1) * (mThick / 2) + 0.5;
-                    pattern += `<path d="M ${xPos},0 L ${xPos},${h}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}"/>\n`;
-                }
-            } else if (panel.type === 'concentric') {
-                let rings = d * 1.2; let cx = w * getRnd(0.2, 0.8, pSeed); let cy = h * getRnd(0.2, 0.8, pSeed+1);
-                for (let i = 1; i <= rings; i++) {
-                    let r = mapRange(i, 0, rings, 10, w*1.5);
-                    let sw = (Math.sin((i * 0.15 * lFreq) + phaseShift) + 1) * (mThick / 2) + 0.5;
-                    pattern += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}" />\n`;
-                }
-            } else if (panel.type === 'mesh') {
-                for (let i = 0; i <= d; i++) {
-                    let y = mapRange(i, 0, d, 0, h); let sw = (Math.sin((i * 0.15 * lFreq) + phaseShift) + 1) * (mThick*0.4) + 0.5;
-                    pattern += `<path d="M 0,${y} Q ${w/2},${y + h*0.2} ${w},${y}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}"/>\n`;
-                }
-                for (let i = 0; i <= d; i++) {
-                    let x = mapRange(i, 0, d, 0, w); let sw = (Math.cos((i * 0.15 * lFreq) + phaseShift) + 1) * (mThick*0.4) + 0.5;
-                    pattern += `<path d="M ${x},0 Q ${x + w*0.2},${h/2} ${x},${h}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}"/>\n`;
-                }
-            } else if (panel.type === 'glitch') {
-                for (let r = 0; r < d; r++) {
-                    let y = mapRange(r, 0, d, 0, h); let blockH = (h / d) * getRnd(0.5, 1.2, pSeed+r);
-                    let segs = Math.floor(getRnd(2, 6, pSeed+r)); let cX = 0;
-                    for (let s = 0; s < segs; s++) {
-                        let segW = getRnd(w*0.05, w*0.5, pSeed+r+s); if (cX + segW > w) segW = w - cX;
-                        if (getRnd(0, 1, pSeed+r*3+s) > 0.3) {
-                            let yOff = (Math.sin(r * lFreq * 0.1) * mThick*0.5);
-                            pattern += `<rect x="${cX}" y="${y + yOff}" width="${segW}" height="${blockH}" fill="${p.line}" />\n`;
-                        }
-                        cX += segW + getRnd(5, 30, pSeed+r*4+s); if(cX >= w) break;
-                    }
-                }
-            } else if (panel.type === 'diagonal') {
-                let diagAmt = d * 2.5;
-                for (let i = 0; i <= diagAmt; i++) {
-                    let yPos = mapRange(i, 0, diagAmt, -h, h * 1.5);
-                    let sw = (Math.sin((i * 0.1 * lFreq) + phaseShift) + 1) * (mThick / 2) + 0.5;
-                    pattern += `<path d="M 0,${yPos} L ${w},${yPos - h*0.8}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}"/>\n`;
-                }
-            } else if (panel.type === 'magnetic') {
-                let cx = w/2 + (Math.sin(pSeed)*w*0.3); let cy = h/2 + (Math.cos(pSeed)*h*0.3);
-                for (let i = 0; i <= linesAmt; i++) {
-                    let yPos = mapRange(i, 0, linesAmt, -h*0.2, h*1.2);
-                    let sw = (Math.sin((i * 0.1 * lFreq) + phaseShift) + 1) * (mThick / 2) + 0.5;
-                    pattern += `<path d="M 0,${yPos} Q ${cx},${cy} ${w},${yPos}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}"/>\n`;
-                }
-            } else if (panel.type === 'dashed_circle') {
-                let rings = d * 1.2; let cx = w/2; let cy = h/2;
-                for (let i = 1; i <= rings; i++) {
-                    let r = mapRange(i, 0, rings, 10, w*1.2);
-                    let sw = (Math.sin((i * 0.15 * lFreq) + phaseShift) + 1) * (mThick / 2) + 0.5;
-                    let dash = `${getRnd(10, 80, pSeed+i)} ${getRnd(10, 50, pSeed+i*2)}`;
-                    pattern += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}" stroke-dasharray="${dash}" />\n`;
-                }
-            } else if (panel.type === 'arched') {
-                for (let i = 0; i <= linesAmt; i++) {
-                    let r = mapRange(i, 0, linesAmt, w*0.1, w*2.5);
-                    let sw = (Math.sin((i * 0.1 * lFreq) + phaseShift) + 1) * (mThick / 2) + 0.5;
-                    pattern += `<circle cx="0" cy="${h}" r="${r}" fill="none" stroke="${p.line}" stroke-width="${sw.toFixed(2)}" />\n`;
-                }
-            }
-
-            const sideW = w * 0.12; const pad = sideW * 0.25;
-            let typo = `<rect x="0" y="0" width="${sideW}" height="${h}" fill="${p.typo}" />`;
-            typo += `<line x1="${sideW}" y1="0" x2="${sideW}" y2="${h}" stroke="${p.line}" stroke-width="4" />`;
-            
-            // Updated Generic Text for Adobe Stock
-            let txt = "Lorem ipsum dolor sit amet - Premium Vector Studio.";
-            typo += `<text x="${-h + pad}" y="${pad * 1.5}" transform="rotate(-90)" font-weight="600" font-size="${sideW * 0.08}" fill="${p.line}" opacity="0.6">${txt}</text>`;
-            typo += `<text x="${-h + pad}" y="${pad * 2.2}" transform="rotate(-90)" font-weight="600" font-size="${sideW * 0.08}" fill="${p.line}" opacity="0.6">${txt}</text>`;
-            
-            let boxY = h - (w * 0.45);
-            typo += `<text x="${pad}" y="${boxY}" font-weight="900" font-size="${sideW * 0.15}" fill="${p.line}">VOL</text>`;
-            typo += `<text x="${pad}" y="${boxY + sideW*0.12}" font-weight="700" font-size="${sideW * 0.12}" fill="${p.line}">#0${panel.id}</text>`;
-            let boxCol = (p.bg === '#1C212E' || p.bg === '#09090b') ? '#00E5FF' : '#FF3366'; 
-            typo += `<rect x="${pad}" y="${boxY + sideW*0.25}" width="${sideW - (pad*2)}" height="${sideW - (pad*2)}" fill="none" stroke="${boxCol}" stroke-width="4" />`;
-
-            let tSize = sideW * 0.55;
-            typo += `<text x="${-h + (w*0.48)}" y="${sideW - pad}" transform="rotate(-90)" font-weight="900" font-size="${tSize}" fill="${p.text}" letter-spacing="${tSize * 0.02}">${panel.title}</text>`;
-            
-            // Updated Main Vertical Titles to Generic words
-            typo += `<text x="${pad}" y="${pad*2}" font-weight="900" font-size="${sideW * 0.12}" fill="${p.text}" letter-spacing="-1">LOREM</text>`;
-            typo += `<text x="${pad}" y="${pad*2 + sideW*0.12}" font-weight="900" font-size="${sideW * 0.12}" fill="${p.text}" letter-spacing="-1">IPSUM</text>`;
-            typo += `<text x="${pad}" y="${pad*2 + sideW*0.24}" font-weight="900" font-size="${sideW * 0.12}" fill="${p.line}" letter-spacing="-1">DOLOR</text>`;
-
-            return { pattern, typo };
-        }
-
-        function buildMasterSVG() {
-            const density = parseInt(inputs.density.value); 
-            const freq = parseInt(inputs.freq.value) / 100; 
-            const maxThick = parseInt(inputs.thick.value);
-            
-            const totalWidth = (w * 4) + (gap * 3); 
-            const totalHeight = h;
-
-            let allPanelsSVG = '';
-            activePanels.forEach((panel, index) => {
-                let elems = getPosterElements(panel, index, density, freq, maxThick);
-                let pX = index * (w + gap);
-                
-                allPanelsSVG += `
-                    <g transform="translate(${pX}, 0)">
-                        <rect width="${w}" height="${h}" fill="${panel.palette.bg}" />
-                        <g clip-path="url(#clip-${index})">${elems.pattern}</g>
-                        <g font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">${elems.typo}</g>
-                    </g>`;
-            });
-
-            return `<?xml version="1.0" encoding="utf-8"?>
-            <svg xmlns="http://www.w3.org/2000/svg" width="${totalWidth}" height="${totalHeight}" viewBox="0 0 ${totalWidth} ${totalHeight}">
-                <defs>${activePanels.map((_, i) => `<clipPath id="clip-${i}"><rect width="${w}" height="${h}"/></clipPath>`).join('\n')}</defs>
-                <rect width="${totalWidth}" height="${totalHeight}" fill="#ffffff" />
-                ${allPanelsSVG}
-            </svg>`;
-        }
-
-        function updateView() {
-            vals.density.innerText = inputs.density.value; 
-            vals.freq.innerText = inputs.freq.value + '%'; 
-            vals.thick.innerText = inputs.thick.value + 'px';
-            
-            const svgStr = buildMasterSVG();
-            const displaySVG = svgStr.replace('<?xml version="1.0" encoding="utf-8"?>\n', '');
-            
-            const totalWidth = (w * 4) + (gap * 3);
-            svgContainer.style.aspectRatio = `${totalWidth} / ${h}`;
-            svgContainer.innerHTML = displaySVG;
-        }
-
-        function executeMasterDownload() {
-            const svgStr = buildMasterSVG();
-            const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
-            const url = URL.createObjectURL(blob); 
-            const a = document.createElement('a');
-            
-            a.href = url; 
-            a.download = `DDL_MasterBoard_${Date.now()}.svg`;
-            document.body.appendChild(a); 
-            a.click();
-            
-            setTimeout(() => { document.body.removeChild(a); window.URL.revokeObjectURL(url); }, 100);
-            logConsole("4-in-1 Master Artboard Downloaded Successfully!");
-        }
-
-        function logConsole(msg) { consoleMsg.innerHTML = `${msg}`; }
-
-        Object.values(inputs).forEach(el => { if(el) { el.addEventListener('input', updateView); el.addEventListener('change', updateView); } });
-        document.getElementById('btn-shuffle').addEventListener('click', () => { globalSeed = Math.random() * 100000; randomizePanels(); updateView(); logConsole("Styles shuffled!"); });
-        
-        randomizePanels();
-        updateView();
+        (()=>{const _0x1a2b={c:firebaseConfig={apiKey:"AIzaSyAAZycgF4YJUtjtt1jWiuG1djPsIn69mDg",authDomain:"ddl-poster-pro.firebaseapp.com",projectId:"ddl-poster-pro",storageBucket:"ddl-poster-pro.firebasestorage.app",messagingSenderId:"1058053588687",appId:"1:1058053588687:web:70ce4e087b38b976fe99ba",measurementId:"G-PG8QV8DPLJ"}};if(!firebase.apps.length){firebase.initializeApp(_0x1a2b.c)}const auth=firebase.auth(),db=firebase.firestore(),loginOverlay=document.getElementById('login-overlay'),btnGoogleLogin=document.getElementById('btn-google-login'),loginError=document.getElementById('login-error'),userProfile=document.getElementById('user-profile'),userAvatar=document.getElementById('user-avatar'),userName=document.getElementById('user-name');let currentUser=null,isUserPro=!1;auth.onAuthStateChanged(a=>{if(a){currentUser=a;loginOverlay.style.display='none';userProfile.style.display='flex';userName.innerText=a.displayName?a.displayName.split(' ')[0]:'User';userAvatar.src=a.photoURL||'https://ui-avatars.com/api/?name=User&background=00E5FF&color=000';const b=db.collection("users").doc(a.uid);b.get().then(c=>{if(!c.exists){b.set({uid:a.uid,name:a.displayName,email:a.email,photo:a.photoURL,isPaid:!1,lastLogin:firebase.firestore.FieldValue.serverTimestamp()})}else{b.update({lastLogin:firebase.firestore.FieldValue.serverTimestamp()})}});b.onSnapshot(c=>{if(c.exists){let d=c.data();if(d.isPaid===!0){isUserPro=!0;applyProUI()}}});logConsole(`Welcome back, ${a.displayName}!`)}else{currentUser=null;loginOverlay.style.display='flex';userProfile.style.display='none'}});btnGoogleLogin.addEventListener('click',()=>{btnGoogleLogin.innerHTML='Connecting...';const a=new firebase.auth.GoogleAuthProvider();auth.signInWithPopup(a).catch(b=>{console.error("Error:",b);loginError.style.display='block';btnGoogleLogin.innerHTML='Sign in'})});window.applyProUI=function(){const a=document.getElementById('btn-download-master');a.classList.add('unlocked');a.innerHTML='↓ Download 4-in-1 Masterboard';const b=document.getElementById('btn-pro-status');b.innerText='✨ PRO ACTIVE (LIFETIME)';b.style.background='#00C853';b.style.color='#fff';logConsole("Lifetime Pro Status Active!")};window.openPaymentModal=function(){if(isUserPro){alert("Account is already PRO!");return}document.getElementById('payment-modal').style.display='flex'};window.submitVerification=function(){const a=document.getElementById('pay-sender').value.trim(),b=document.getElementById('pay-trxid').value.trim(),c=document.getElementById('btn-submit-verification');if(a===''||b===''){alert('Please enter Number and TrxID.');return}c.innerText='SENDING REQUEST...';c.style.pointerEvents='none';let d={senderAccount:a,transactionId:b,amount:"৳100",userEmail:currentUser?currentUser.email:"Anon",userName:currentUser?currentUser.displayName:"Guest",userId:currentUser?currentUser.uid:"N/A",timestamp:firebase.firestore.FieldValue.serverTimestamp(),status:"Pending"};db.collection("deposits").add(d).catch(e=>console.log(e));setTimeout(()=>{showSuccessUI()},500)};window.showSuccessUI=function(){const a=document.getElementById('btn-submit-verification');a.innerText='SUBMITTED SUCCESSFULLY!';a.style.background='#00C853';a.style.color='#fff';document.getElementById('pay-form-container').innerHTML=`<div style="color:#00C853;font-weight:bold;font-size:15px;margin-bottom:10px;">Request Received!</div><div style="color:#fff;font-size:13px;">Admin will verify TrxID.</div>`};window.handleMasterDownload=function(){if(!isUserPro){openPaymentModal();return}executeMasterDownload()};const svgContainer=document.getElementById('svg-container'),consoleMsg=document.getElementById('console-msg');let globalSeed=Math.random()*100000;const w=1800,h=2520,gap=40,inputs={density:document.getElementById('inp-density'),freq:document.getElementById('inp-freq'),thick:document.getElementById('inp-thick')},vals={density:document.getElementById('val-density'),freq:document.getElementById('val-freq'),thick:document.getElementById('val-thick')},patternTypes=['chevron','wavy','vertical','concentric','mesh','glitch','diagonal','magnetic','dashed_circle','arched'],colorPalettes=[{bg:'#E4E3DF',line:'#1C212E',typo:'#E4E3DF',text:'#1C212E'},{bg:'#1C212E',line:'#E4E3DF',typo:'#E4E3DF',text:'#1C212E'},{bg:'#E3242B',line:'#0B1021',typo:'#E3242B',text:'#FFFFFF'},{bg:'#FFD700',line:'#111111',typo:'#FFD700',text:'#111111'},{bg:'#4A1D23',line:'#F4F1EA',typo:'#4A1D23',text:'#FFFFFF'},{bg:'#1434A4',line:'#0B1021',typo:'#1434A4',text:'#F0E6D2'},{bg:'#CBA135',line:'#2A2A2A',typo:'#CBA135',text:'#FFFFFF'},{bg:'#FFB6C1',line:'#E3242B',typo:'#FFB6C1',text:'#FFFFFF'},{bg:'#BFFF00',line:'#1C212E',typo:'#BFFF00',text:'#1C212E'},{bg:'#F0E6D2',line:'#1A2436',typo:'#F0E6D2',text:'#8CB83C'}],titles=['LOREM','IPSUM','DOLOR','POSTER','VECTOR','MODERN','STUDIO','ABSTRACT','VORTEX','MINIMAL'];let activePanels=[];function shuffleArray(a){let b=[...a];for(let c=b.length-1;c>0;c--){const d=Math.floor(Math.random()*(c+1));[b[c],b[d]]=[b[d],b[c]]}return b}function randomizePanels(){activePanels=[];let a=shuffleArray(patternTypes),b=shuffleArray(colorPalettes),c=shuffleArray(titles);for(let d=0;d<4;d++){activePanels.push({type:a[d],palette:JSON.parse(JSON.stringify(b[d])),title:c[d],id:Math.floor(Math.random()*90)+10})}syncAllCustomizeUIs()}function syncAllCustomizeUIs(){for(let a=0;a<4;a++){document.getElementById(`inp-title-${a}`).value=activePanels[a].title;document.getElementById(`inp-bg-${a}`).value=activePanels[a].palette.bg;document.getElementById(`inp-line-${a}`).value=activePanels[a].palette.line;document.getElementById(`inp-typo-${a}`).value=activePanels[a].palette.typo;document.getElementById(`inp-text-${a}`).value=activePanels[a].palette.text}}window.applyCustomizations=function(a){let b=a.target.getAttribute('data-index');if(b!==null){activePanels[b].title=document.getElementById(`inp-title-${b}`).value||'POSTER';activePanels[b].palette.bg=document.getElementById(`inp-bg-${b}`).value;activePanels[b].palette.line=document.getElementById(`inp-line-${b}`).value;activePanels[b].palette.typo=document.getElementById(`inp-typo-${b}`).value;activePanels[b].palette.text=document.getElementById(`inp-text-${b}`).value;updateView()}};document.querySelectorAll('.panel-input').forEach(a=>{a.addEventListener('input',applyCustomizations)});const mapRange=(a,b,c,d,e)=>(a-b)*(e-d)/(c-b)+d;function getRnd(a,b,c){let d=Math.sin(c)*10000;return(d-Math.floor(d))*(b-a)+a}function getPosterElements(a,b,c,d,e){let f='';let g=globalSeed*(b+1.23);let p=a.palette;let i=Math.floor(c*getRnd(0.5,1.6,g));let j=e*getRnd(0.4,2.0,g+1);let k=d*getRnd(0.5,1.8,g+2);let l=Math.floor(i*1.5);let m=getRnd(0,Math.PI,g);if(a.type==='chevron'){for(let n=0;n<=l;n++){let o=mapRange(n,0,l,-h*0.2,h*1.2);let q=(Math.sin((n*0.1*k)+m)+1)*(j/2)+0.5;f+=`<path d="M 0,${o} L ${w*0.5},${o+h*0.15} L ${w},${o}" fill="none" stroke="${p.line}" stroke-width="${q.toFixed(2)}" stroke-linejoin="miter"/>\n`}}else if(a.type==='wavy'){for(let n=0;n<=l;n++){let o=mapRange(n,0,l,-h*0.2,h*1.2);let q=(Math.sin((n*0.12*k)+m)+1)*(j/2)+0.5;let r=Math.cos((n*0.08*k)+m)*(h*0.3);f+=`<path d="M 0,${o} Q ${w*0.5},${o+r} ${w},${o}" fill="none" stroke="${p.line}" stroke-width="${q.toFixed(2)}"/>\n`}}else if(a.type==='vertical'){for(let n=0;n<=i*2;n++){let o=mapRange(n,0,i*2,0,w);let q=(Math.sin((n*0.1*k)+m)+1)*(j/2)+0.5;f+=`<path d="M ${o},0 L ${o},${h}" fill="none" stroke="${p.line}" stroke-width="${q.toFixed(2)}"/>\n`}}else if(a.type==='concentric'){let n=i*1.2;let o=w*getRnd(0.2,0.8,g);let q=h*getRnd(0.2,0.8,g+1);for(let r=1;r<=n;r++){let s=mapRange(r,0,n,10,w*1.5);let t=(Math.sin((r*0.15*k)+m)+1)*(j/2)+0.5;f+=`<circle cx="${o}" cy="${q}" r="${s}" fill="none" stroke="${p.line}" stroke-width="${t.toFixed(2)}" />\n`}}else if(a.type==='mesh'){for(let n=0;n<=i;n++){let o=mapRange(n,0,i,0,h);let q=(Math.sin((n*0.15*k)+m)+1)*(j*0.4)+0.5;f+=`<path d="M 0,${o} Q ${w/2},${o+h*0.2} ${w},${o}" fill="none" stroke="${p.line}" stroke-width="${q.toFixed(2)}"/>\n`}for(let n=0;n<=i;n++){let o=mapRange(n,0,i,0,w);let q=(Math.cos((n*0.15*k)+m)+1)*(j*0.4)+0.5;f+=`<path d="M ${o},0 Q ${o+w*0.2},${h/2} ${o},${h}" fill="none" stroke="${p.line}" stroke-width="${q.toFixed(2)}"/>\n`}}else if(a.type==='glitch'){for(let n=0;n<i;n++){let o=mapRange(n,0,i,0,h);let q=(h/i)*getRnd(0.5,1.2,g+n);let r=Math.floor(getRnd(2,6,g+n));let s=0;for(let t=0;t<r;t++){let u=getRnd(w*0.05,w*0.5,g+n+t);if(s+u>w)u=w-s;if(getRnd(0,1,g+n*3+t)>0.3){let v=(Math.sin(n*k*0.1)*j*0.5);f+=`<rect x="${s}" y="${o+v}" width="${u}" height="${q}" fill="${p.line}" />\n`}s+=u+getRnd(5,30,g+n*4+t);if(s>=w)break}}}else if(a.type==='diagonal'){let n=i*2.5;for(let o=0;o<=n;o++){let q=mapRange(o,0,n,-h,h*1.5);let r=(Math.sin((o*0.1*k)+m)+1)*(j/2)+0.5;f+=`<path d="M 0,${q} L ${w},${q-h*0.8}" fill="none" stroke="${p.line}" stroke-width="${r.toFixed(2)}"/>\n`}}else if(a.type==='magnetic'){let n=w/2+(Math.sin(g)*w*0.3);let o=h/2+(Math.cos(g)*h*0.3);for(let q=0;q<=l;q++){let r=mapRange(q,0,l,-h*0.2,h*1.2);let s=(Math.sin((q*0.1*k)+m)+1)*(j/2)+0.5;f+=`<path d="M 0,${r} Q ${n},${o} ${w},${r}" fill="none" stroke="${p.line}" stroke-width="${s.toFixed(2)}"/>\n`}}else if(a.type==='dashed_circle'){let n=i*1.2;let o=w/2;let q=h/2;for(let r=1;r<=n;r++){let s=mapRange(r,0,n,10,w*1.2);let t=(Math.sin((r*0.15*k)+m)+1)*(j/2)+0.5;let u=`${getRnd(10,80,g+r)} ${getRnd(10,50,g+r*2)}`;f+=`<circle cx="${o}" cy="${q}" r="${s}" fill="none" stroke="${p.line}" stroke-width="${t.toFixed(2)}" stroke-dasharray="${u}" />\n`}}else if(a.type==='arched'){for(let n=0;n<=l;n++){let o=mapRange(n,0,l,w*0.1,w*2.5);let q=(Math.sin((n*0.1*k)+m)+1)*(j/2)+0.5;f+=`<circle cx="0" cy="${h}" r="${o}" fill="none" stroke="${p.line}" stroke-width="${q.toFixed(2)}" />\n`}}const sW=w*0.12;const pd=sW*0.25;let typo=`<rect x="0" y="0" width="${sW}" height="${h}" fill="${p.typo}" />`;typo+=`<line x1="${sW}" y1="0" x2="${sW}" y2="${h}" stroke="${p.line}" stroke-width="4" />`;let txt="Lorem ipsum dolor sit amet - Premium Vector Studio.";typo+=`<text x="${-h+pd}" y="${pd*1.5}" transform="rotate(-90)" font-weight="600" font-size="${sW*0.08}" fill="${p.line}" opacity="0.6">${txt}</text>`;typo+=`<text x="${-h+pd}" y="${pd*2.2}" transform="rotate(-90)" font-weight="600" font-size="${sW*0.08}" fill="${p.line}" opacity="0.6">${txt}</text>`;let bxY=h-(w*0.45);typo+=`<text x="${pd}" y="${bxY}" font-weight="900" font-size="${sW*0.15}" fill="${p.line}">VOL</text>`;typo+=`<text x="${pd}" y="${bxY+sW*0.12}" font-weight="700" font-size="${sW*0.12}" fill="${p.line}">#0${a.id}</text>`;let bxC=(p.bg==='#1C212E'||p.bg==='#09090b')?'#00E5FF':'#FF3366';typo+=`<rect x="${pd}" y="${bxY+sW*0.25}" width="${sW-(pd*2)}" height="${sW-(pd*2)}" fill="none" stroke="${bxC}" stroke-width="4" />`;let tS=sW*0.55;typo+=`<text x="${-h+(w*0.48)}" y="${sW-pd}" transform="rotate(-90)" font-weight="900" font-size="${tS}" fill="${p.text}" letter-spacing="${tS*0.02}">${a.title}</text>`;typo+=`<text x="${pd}" y="${pd*2}" font-weight="900" font-size="${sW*0.12}" fill="${p.text}" letter-spacing="-1">LOREM</text>`;typo+=`<text x="${pd}" y="${pd*2+sW*0.12}" font-weight="900" font-size="${sW*0.12}" fill="${p.text}" letter-spacing="-1">IPSUM</text>`;typo+=`<text x="${pd}" y="${pd*2+sW*0.24}" font-weight="900" font-size="${sW*0.12}" fill="${p.line}" letter-spacing="-1">DOLOR</text>`;return{pattern:f,typo:typo}}function buildMasterSVG(){const a=parseInt(inputs.density.value),b=parseInt(inputs.freq.value)/100,c=parseInt(inputs.thick.value),d=(w*4)+(gap*3),e=h;let f='';activePanels.forEach((g,i)=>{let j=getPosterElements(g,i,a,b,c);let k=i*(w+gap);f+=`<g transform="translate(${k}, 0)"><rect width="${w}" height="${h}" fill="${g.palette.bg}" /><g clip-path="url(#clip-${i})">${j.pattern}</g><g font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">${j.typo}</g></g>`});return`<?xml version="1.0" encoding="utf-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${d}" height="${e}" viewBox="0 0 ${d} ${e}"><defs>${activePanels.map((_,g)=>`<clipPath id="clip-${g}"><rect width="${w}" height="${h}"/></clipPath>`).join('\n')}</defs><rect width="${d}" height="${e}" fill="#ffffff" />${f}</svg>`}function updateView(){vals.density.innerText=inputs.density.value;vals.freq.innerText=inputs.freq.value+'%';vals.thick.innerText=inputs.thick.value+'px';const a=buildMasterSVG();const b=a.replace('<?xml version="1.0" encoding="utf-8"?>\n','');const c=(w*4)+(gap*3);svgContainer.style.aspectRatio=`${c} / ${h}`;svgContainer.innerHTML=b}window.executeMasterDownload=function(){const a=buildMasterSVG(),b=new Blob([a],{type:'image/svg+xml;charset=utf-8'}),c=URL.createObjectURL(b),d=document.createElement('a');d.href=c;d.download=`DDL_MasterBoard_${Date.now()}.svg`;document.body.appendChild(d);d.click();setTimeout(()=>{document.body.removeChild(d);window.URL.revokeObjectURL(c)},100);logConsole("4-in-1 Masterboard Downloaded Successfully!")};function logConsole(a){consoleMsg.innerHTML=`${a}`}Object.values(inputs).forEach(a=>{if(a){a.addEventListener('input',updateView);a.addEventListener('change',updateView)}});document.getElementById('btn-shuffle').addEventListener('click',()=>{globalSeed=Math.random()*100000;randomizePanels();updateView();logConsole("Styles shuffled!")});randomizePanels();updateView()})();
     </script>
 </body>
 </html>
